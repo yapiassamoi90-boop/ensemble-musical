@@ -28,18 +28,69 @@
 
     <div id="app" class="max-w-6xl mx-auto p-4">
         <!-- Écran de connexion -->
-        <div id="loginScreen" class="bg-white rounded-lg shadow-lg p-8 max-w-md mx-auto mt-20">
-            <h1 class="text-3xl font-bold text-center mb-6 text-blue-600">Ensemble Musical</h1>
-            <input id="churchCode" type="text" placeholder="Code de ton église" class="w-full p-3 border rounded-lg mb-4 text-center uppercase">
-            <input id="userName" type="text" placeholder="Ton prénom" class="w-full p-3 border rounded-lg mb-4">
-            <select id="userRole" class="w-full p-3 border rounded-lg mb-6">
-                <option value="member">Membre</option>
-                <option value="admin">Administrateur</option>
-            </select>
-            <button onclick="login()" class="w-full bg-blue-600 text-white p-3 rounded-lg font-bold hover:bg-blue-700">
-                Entrer
-            </button>
-        </div>
+        <div id="loginScreen" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: #f5f5f5; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; font-family: Arial, sans-serif;">
+  
+  <h1 style="color: #333; margin-bottom: 10px; font-size: 28px; font-weight: bold;">GROUPE MUSICAL</h1>
+  
+  <p style="color: #666; margin-bottom: 30px; font-size: 14px;">Entrez le nom de votre église + code</p>
+  
+  <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 90%; max-width: 350px;">
+    
+    <input 
+      type="text" 
+      id="nomEglise" 
+      placeholder="Nom de l'église : Ex Bethel"
+      style="width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;"
+    >
+    
+    <input 
+      type="password" 
+      id="codePortail" 
+      placeholder="Code portail : 1234"
+      style="width: 100%; padding: 15px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;"
+    >
+    
+    <button 
+      onclick="verifierAcces()"
+      style="width: 100%; padding: 15px; background: #4A90E2; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer;"
+    >
+      ENTRER
+    </button>
+    
+    <p style="color: #999; font-size: 12px; text-align: center; margin-top: 20px; line-height: 1.4;">
+      Première fois ? Tapez le nom de votre église + 1234<br>
+      Votre espace sera créé automatiquement
+    </p>
+    
+  </div>
+</div>
+
+<script>
+function verifierAcces() {
+  const nom = document.getElementById('nomEglise').value.trim();
+  const code = document.getElementById('codePortail').value.trim();
+  
+  if (nom === '' || code === '') {
+    alert('Remplis tous les champs');
+    return;
+  }
+  
+  if (code === '1234') {
+    localStorage.setItem('egliseConnectee', nom);
+    document.getElementById('loginScreen').style.display = 'none';
+    alert('Bienvenue ' + nom);
+  } else {
+    alert('Code portail incorrect');
+  }
+}
+
+window.onload = function() {
+  const eglise = localStorage.getItem('egliseConnectee');
+  if (eglise) {
+    document.getElementById('loginScreen').style.display = 'none';
+  }
+}
+</script>
 
         <!-- App principale -->
         <div id="mainApp" class="hidden">
