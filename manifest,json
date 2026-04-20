@@ -1,0 +1,22 @@
+{
+  "name": "Groupe Musical Multi-Eglise",
+  "short_name": "GM Eglise",
+  "description": "Application de gestion groupe musical multi-églises",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F0F0F0",
+  "theme_color": "#6495ED",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3659/3659784.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3659/3659784.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
