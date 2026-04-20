@@ -169,29 +169,11 @@ window.onload = function() {
             }
         }
 
-        // Service Worker pour mode hors-ligne basique
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('data:text/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgZXZlbnQgPT4gewogIHNlbGYuc2tpcFdhaXRpbmcoKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcignZmV0Y2gnLCBldmVudCA9PiB7CiAgZXZlbnQucmVzcG9uZFdpdGgoZmV0Y2goZXZlbnQucmVxdWVzdCkpOwp9KTs=');
-        }
+       // Service Worker pour mode hors-ligne basique
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js')
+}
 
-        window.login = function() {
-            currentChurch = document.getElementById('churchCode').value.toUpperCase().trim();
-            currentUser = document.getElementById('userName').value.trim();
-            currentRole = document.getElementById('userRole').value;
-            if (!currentChurch || !currentUser) return alert('Remplis le code église et ton prénom chef');
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('mainApp').classList.remove('hidden');
-            document.getElementById('currentChurch').textContent = currentChurch;
-            document.getElementById('currentUser').textContent = currentUser + ' (' + currentRole + ')';
-            if (currentRole === 'admin') {
-                document.getElementById('addProgrammeBtn').classList.remove('hidden');
-                document.getElementById('addCantiqueBtn').classList.remove('hidden');
-            }
-            set(ref(db, `eglises/${currentChurch}/membres/${currentUser}`), {
-                nom: currentUser, role: currentRole, lastSeen: Date.now()
-            });
-            loadData();
-        }
 
         window.logout = () => location.reload();
         window.showTab = function(tab) {
