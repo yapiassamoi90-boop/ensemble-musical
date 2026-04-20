@@ -1,0 +1,224 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ensemble Musical</title>
+    
+    <!-- PWA Config -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkVuc2VtYmxlIE11c2ljYWwiLAogICJzaG9ydF9uYW1lIjogIk11c2ljYWwiLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI2ZmZmZmZiIsCiAgInRoZW1lX2NvbG9yIjogIiMzYjgyZjYiLAogICJpY29ucyI6IFsKICAgIHsKICAgInNyYyI6ICJodHRwczovL2ltZy5pY29uczguY29tL2ZsdWVuY3kvNDgvMDAwMDAwL211c2ljYWwtbm90ZXMucG5nIiwKICAgICAgInNpemVzIjogIjQ4eDQ4IiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfSwKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL2ltZy5pY29uczguY29tL2ZsdWVuY3kvMTkyLzAwMDAwMC9tdXNpY2FsLW5vdGVzLnBuZyIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfSwKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL2ltZy5pY29uczguY29tL2ZsdWVuY3kvNTEyLzAwMDAwMC9tdXNpY2FsLW5vdGVzLnBuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfQ==">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/192/000000/musical-notes.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .hidden { display: none; }
+        .tab-active { background-color: #3b82f6; color: white; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Bannière "Installer l app" -->
+    <div id="installBanner" class="hidden bg-blue-600 text-white p-3 text-center">
+        <span>Installe l appli sur ton téléphone 👉</span>
+        <button onclick="installApp()" class="bg-white text-blue-600 px-3 py-1 rounded-lg ml-2 font-bold">Installer</button>
+        <button onclick="this.parentElement.remove()" class="ml-2">✕</button>
+    </div>
+
+    <div id="app" class="max-w-6xl mx-auto p-4">
+        <!-- Écran de connexion -->
+        <div id="loginScreen" class="bg-white rounded-lg shadow-lg p-8 max-w-md mx-auto mt-20">
+            <h1 class="text-3xl font-bold text-center mb-6 text-blue-600">Ensemble Musical</h1>
+            <input id="churchCode" type="text" placeholder="Code de ton église" class="w-full p-3 border rounded-lg mb-4 text-center uppercase">
+            <input id="userName" type="text" placeholder="Ton prénom" class="w-full p-3 border rounded-lg mb-4">
+            <select id="userRole" class="w-full p-3 border rounded-lg mb-6">
+                <option value="member">Membre</option>
+                <option value="admin">Administrateur</option>
+            </select>
+            <button onclick="login()" class="w-full bg-blue-600 text-white p-3 rounded-lg font-bold hover:bg-blue-700">
+                Entrer
+            </button>
+        </div>
+
+        <!-- App principale -->
+        <div id="mainApp" class="hidden">
+            <header class="bg-white rounded-lg shadow p-4 mb-4 flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-blue-600">Ensemble Musical</h1>
+                    <p class="text-gray-600">Église: <span id="currentChurch" class="font-bold"></span> | <span id="currentUser"></span></p>
+                </div>
+                <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg">Déconnexion</button>
+            </header>
+
+            <div class="bg-white rounded-lg shadow mb-4 flex">
+                <button onclick="showTab('programmes')" id="tab-programmes" class="tab-active flex-1 p-4 rounded-l-lg font-bold">Programmes</button>
+                <button onclick="showTab('cantiques')" id="tab-cantiques" class="flex-1 p-4 font-bold">Cantiques</button>
+                <button onclick="showTab('membres')" id="tab-membres" class="flex-1 p-4 rounded-r-lg font-bold">Membres</button>
+            </div>
+
+            <div id="content-programmes" class="bg-white rounded-lg shadow p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold">Programmes du culte</h2>
+                    <button id="addProgrammeBtn" onclick="addProgramme()" class="hidden bg-green-500 text-white px-4 py-2 rounded-lg">+ Ajouter</button>
+                </div>
+                <div id="programmesList"></div>
+            </div>
+
+            <div id="content-cantiques" class="hidden bg-white rounded-lg shadow p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold">Cantiques</h2>
+                    <button id="addCantiqueBtn" onclick="addCantique()" class="hidden bg-green-500 text-white px-4 py-2 rounded-lg">+ Ajouter</button>
+                </div>
+                <div id="cantiquesList"></div>
+            </div>
+
+            <div id="content-membres" class="hidden bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold mb-4">Membres de l'église</h2>
+                <div id="membresList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, push, onValue, set, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0GcSgzo-SuXJEGSdp0riEKsr52UFgY50",
+            authDomain: "ensemble-musical.firebaseapp.com",
+            databaseURL: "https://ensemble-musical-default-rtdb.firebaseio.com",
+            projectId: "ensemble-musical",
+            storageBucket: "ensemble-musical.firebasestorage.app",
+            messagingSenderId: "910801581105",
+            appId: "1:910801581105:web:d9147b8900cb05926bd110"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let currentChurch = '', currentUser = '', currentRole = '';
+
+        // PWA Install
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBanner').classList.remove('hidden');
+        });
+
+        window.installApp = function() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(() => {
+                    deferredPrompt = null;
+                    document.getElementById('installBanner').remove();
+                });
+            }
+        }
+
+        // Service Worker pour mode hors-ligne basique
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:text/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgZXZlbnQgPT4gewogIHNlbGYuc2tpcFdhaXRpbmcoKTsKfSk7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcignZmV0Y2gnLCBldmVudCA9PiB7CiAgZXZlbnQucmVzcG9uZFdpdGgoZmV0Y2goZXZlbnQucmVxdWVzdCkpOwp9KTs=');
+        }
+
+        window.login = function() {
+            currentChurch = document.getElementById('churchCode').value.toUpperCase().trim();
+            currentUser = document.getElementById('userName').value.trim();
+            currentRole = document.getElementById('userRole').value;
+            if (!currentChurch || !currentUser) return alert('Remplis le code église et ton prénom chef');
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('currentChurch').textContent = currentChurch;
+            document.getElementById('currentUser').textContent = currentUser + ' (' + currentRole + ')';
+            if (currentRole === 'admin') {
+                document.getElementById('addProgrammeBtn').classList.remove('hidden');
+                document.getElementById('addCantiqueBtn').classList.remove('hidden');
+            }
+            set(ref(db, `eglises/${currentChurch}/membres/${currentUser}`), {
+                nom: currentUser, role: currentRole, lastSeen: Date.now()
+            });
+            loadData();
+        }
+
+        window.logout = () => location.reload();
+        window.showTab = function(tab) {
+            ['programmes', 'cantiques', 'membres'].forEach(t => {
+                document.getElementById(`content-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).classList.remove('tab-active');
+            });
+            document.getElementById(`content-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).classList.add('tab-active');
+        }
+
+        function loadData() {
+            onValue(ref(db, `eglises/${currentChurch}/programmes`), (snap) => {
+                const data = snap.val() || {};
+                let html = '';
+                Object.entries(data).forEach(([key, prog]) => {
+                    html += `<div class="border p-4 rounded-lg mb-3">
+                        <div class="flex justify-between">
+                            <h3 class="font-bold text-lg">${prog.titre}</h3>
+                            ${currentRole === 'admin' ? `<button onclick="deleteItem('programmes','${key}')" class="text-red-500">Supprimer</button>` : ''}
+                        </div>
+                        <p class="text-gray-600">${prog.date}</p>
+                        <p class="mt-2">${prog.details}</p>
+                    </div>`;
+                });
+                document.getElementById('programmesList').innerHTML = html || '<p class="text-gray-500">Aucun programme.</p>';
+            });
+
+            onValue(ref(db, `eglises/${currentChurch}/cantiques`), (snap) => {
+                const data = snap.val() || {};
+                let html = '';
+                Object.entries(data).forEach(([key, cant]) => {
+                    html += `<div class="border p-4 rounded-lg mb-3">
+                        <div class="flex justify-between">
+                            <h3 class="font-bold text-lg">${cant.titre}</h3>
+                            ${currentRole === 'admin' ? `<button onclick="deleteItem('cantiques','${key}')" class="text-red-500">Supprimer</button>` : ''}
+                        </div>
+                        <p class="text-gray-600">Tonalité: ${cant.tonalite}</p>
+                        <pre class="mt-2 bg-gray-50 p-2 rounded whitespace-pre-wrap">${cant.paroles}</pre>
+                    </div>`;
+                });
+                document.getElementById('cantiquesList').innerHTML = html || '<p class="text-gray-500">Aucun cantique.</p>';
+            });
+
+            onValue(ref(db, `eglises/${currentChurch}/membres`), (snap) => {
+                const data = snap.val() || {};
+                let html = '';
+                Object.entries(data).forEach(([key, membre]) => {
+                    html += `<div class="border p-3 rounded-lg mb-2 flex justify-between">
+                        <span>${membre.nom}</span>
+                        <span class="text-sm ${membre.role === 'admin' ? 'text-blue-600 font-bold' : 'text-gray-600'}">${membre.role}</span>
+                    </div>`;
+                });
+                document.getElementById('membresList').innerHTML = html;
+            });
+        }
+
+        window.addProgramme = function() {
+            const titre = prompt('Titre du programme:');
+            const date = prompt('Date:');
+            const details = prompt('Détails:');
+            if (titre && date) {
+                push(ref(db, `eglises/${currentChurch}/programmes`), {titre, date, details: details || '', createdBy: currentUser, timestamp: Date.now()});
+            }
+        }
+
+        window.addCantique = function() {
+            const titre = prompt('Titre du cantique:');
+            const tonalite = prompt('Tonalité:');
+            const paroles = prompt('Paroles:');
+            if (titre && paroles) {
+                push(ref(db, `eglises/${currentChurch}/cantiques`), {titre, tonalite: tonalite || 'Non définie', paroles, createdBy: currentUser, timestamp: Date.now()});
+            }
+        }
+
+        window.deleteItem = function(type, key) {
+            if (confirm('Supprimer ?')) remove(ref(db, `eglises/${currentChurch}/${type}/${key}`));
+        }
+    </script>
+</body>
+</html>
