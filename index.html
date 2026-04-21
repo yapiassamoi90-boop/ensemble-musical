@@ -54,6 +54,10 @@
   <!-- BLOC 2 : ACCUEIL -->
   <div id="accueil" style="display:none; padding:10px; background:#F0F0F0;">
     <h3 style="text-align:center; margin:5px 0 5px 0;">EGLISE : <span id="nom_eglise_actuelle" style="color:#DC143C;"></span></h3>
+
+    <!-- AJOUT STATS AUTO : 1 LIGNE SEULEMENT -->
+    <div id="stats" style="text-align:center; margin:10px 0 15px 0; font-size:16px; font-weight:bold; color:#333; background:#FFFFFF; padding:8px; border-radius:5px;">🎵 Chargement stats...</div>
+
     <button onclick="deconnexion()" style="width:100%; padding:8px; background:#888888; color:#FFFFFF; border:none; margin-bottom:15px;">DECONNEXION</button>
 
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
@@ -335,6 +339,28 @@ var codesDossiers = {
   musicien: '1234'
 };
 
+// AJOUT STATS AUTO : SCRIPT POUR LIRE membres.json
+function chargerStats() {
+  fetch('membres.json')
+ .then(res => {
+    if (!res.ok) throw new Error('Fichier introuvable');
+    return res.json();
+  })
+ .then(data => {
+      let choristes = data.filter(m => m.role === 'Choriste').length;
+      let chantres = data.filter(m => m.role === 'Chantre').length;
+      let musiciens = data.filter(m => m.role === 'Musicien').length;
+      let responsables = data.filter(m => m.role === 'Responsable').length;
+
+      document.getElementById('stats').innerHTML =
+        `🎵 Choristes: ${choristes} | Chantres: ${chantres} | Musiciens: ${musiciens} | Responsables: ${responsables} 🎵`;
+    })
+ .catch(err => {
+      document.getElementById('stats').innerHTML = '🎵 Choristes: 0 | Chantres: 0 | Musiciens: 0 | Responsables: 0 🎵';
+      console.log('Erreur stats:', err);
+    });
+}
+
 function voirMdp(id) {
   let champ = document.getElementById(id);
   if (champ.type === "password") {
@@ -365,6 +391,7 @@ function entrerPortail() {
   msg.innerHTML = '';
 
   chargerDonneesEglise();
+  chargerStats(); // AJOUT : LANCE LES STATS
 }
 
 function deconnexion() {
