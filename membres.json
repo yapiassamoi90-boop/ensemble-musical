@@ -1,0 +1,6 @@
+[
+  { "nom": "Jean", "role": "Choriste" },
+  { "nom": "Marie", "role": "Chantre" },
+  { "nom": "Paul", "role": "Musicien" },
+  { "nom": "Luc", "role": "Responsable" }
+]
