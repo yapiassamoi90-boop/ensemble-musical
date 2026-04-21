@@ -342,11 +342,11 @@ var codesDossiers = {
 // AJOUT STATS AUTO : SCRIPT POUR LIRE membres.json
 function chargerStats() {
   fetch('membres.json')
- .then(res => {
+.then(res => {
     if (!res.ok) throw new Error('Fichier introuvable');
     return res.json();
   })
- .then(data => {
+.then(data => {
       let choristes = data.filter(m => m.role === 'Choriste').length;
       let chantres = data.filter(m => m.role === 'Chantre').length;
       let musiciens = data.filter(m => m.role === 'Musicien').length;
@@ -355,7 +355,7 @@ function chargerStats() {
       document.getElementById('stats').innerHTML =
         `🎵 Choristes: ${choristes} | Chantres: ${chantres} | Musiciens: ${musiciens} | Responsables: ${responsables} 🎵`;
     })
- .catch(err => {
+.catch(err => {
       document.getElementById('stats').innerHTML = '🎵 Choristes: 0 | Chantres: 0 | Musiciens: 0 | Responsables: 0 🎵';
       console.log('Erreur stats:', err);
     });
