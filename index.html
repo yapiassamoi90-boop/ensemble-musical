@@ -44,7 +44,13 @@
 
   <div id="accueil" style="display:none; padding:10px; background:#F0F0F0;">
     <h3 style="text-align:center; margin:5px 0 5px 0;">EGLISE : <span id="nom_eglise_actuelle" style="color:#DC143C;"></span></h3>
-    <div id="stats" style="text-align:center; font-size:18px; font-weight:bold; color:white; background:red; padding:15px; margin:10px;">🔴 SI TU VOIS ÇA, GITHUB MARCHE 🔴</div>
+    <div id="stats" style="text-align:center; background:#F8F8F8; padding:12px; margin:10px 0; border-top:3px solid #DC143C; border-bottom:3px solid #DC143C; font-family:Arial;">
+      <span id="nb_resp" style="font-size:24px; color:#DC143C; font-weight:bold;">0</span> <span style="font-size:12px; margin-right:20px;">Responsables</span>
+      <span id="nb_pasteur" style="font-size:24px; color:#DC143C; font-weight:bold;">0</span> <span style="font-size:12px; margin-right:20px;">Pasteurs</span>
+      <span id="nb_chantre" style="font-size:24px; color:#DC143C; font-weight:bold;">0</span> <span style="font-size:12px; margin-right:20px;">Chantres</span>
+      <span id="nb_choriste" style="font-size:24px; color:#DC143C; font-weight:bold;">0</span> <span style="font-size:12px; margin-right:20px;">Choristes</span>
+      <span id="nb_musicien" style="font-size:24px; color:#DC143C; font-weight:bold;">0</span> <span style="font-size:12px;">Musiciens</span>
+    </div>
     <button onclick="deconnexion()" style="width:100%; padding:8px; background:#888888; color:#FFFFFF; border:none; margin-bottom:15px;">DECONNEXION</button>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
       <button onclick="demanderCode('responsables')" style="padding:25px 5px; font-size:16px; background:#00CED1; color:#000000; border:none;">RESPONSABLES</button>
@@ -277,25 +283,6 @@ var codesDossiers = {
   musicien: '1234'
 };
 
-function chargerStats() {
-  fetch('membres.json')
-.then(res => {
-    if (!res.ok) throw new Error('Fichier introuvable');
-    return res.json();
-  })
-.then(data => {
-      let choristes = data.filter(m => m.role === 'Choriste').length;
-      let chantres = data.filter(m => m.role === 'Chantre').length;
-      let musiciens = data.filter(m => m.role === 'Musicien').length;
-      let responsables = data.filter(m => m.role === 'Responsable').length;
-      document.getElementById('stats').innerHTML = `🎵 Choristes: ${choristes} | Chantres: ${chantres} | Musiciens: ${musiciens} | Responsables: ${responsables} 🎵`;
-    })
-.catch(err => {
-      document.getElementById('stats').innerHTML = '🎵 Choristes: 0 | Chantres: 0 | Musiciens: 0 | Responsables: 0 🎵';
-      console.log('Erreur stats:', err);
-    });
-}
-
 function voirMdp(id) {
   let champ = document.getElementById(id);
   if (champ.type === "password") {
@@ -323,7 +310,6 @@ function entrerPortail() {
   document.getElementById('accueil').style.display = 'block';
   msg.innerHTML = '';
   chargerDonneesEglise();
-  chargerStats();
 }
 
 function deconnexion() {
@@ -463,20 +449,44 @@ function ajouterOuModifier(type) {
   var editId = document.getElementById('edit_id_' + type).value;
   var voix = '';
   var instrument = '';
+  var role = '';
+
   if (type == 'chant') {
     voix = document.getElementById('voix_chant').value;
+    role = 'Chantre';
   }
   if (type == 'chor') {
     voix = document.getElementById('voix_chor').value;
+    role = 'Choriste';
   }
   if (type == 'musi') {
     instrument = document.getElementById('instrument_musi').value;
+    role = 'Musicien';
   }
+  if (type == 'past') {
+    role = 'Pasteur';
+  }
+  if (type == 'resp') {
+    role = 'Responsable';
+  }
+
   if (nom == '' || prenom == '') {
     alert('Nom et Prenom obligatoires');
     return;
   }
-  var membre = {nom: nom, prenom: prenom, tel: tel, adresse: adresse, groupe: type, voix: voix, instrument: instrument};
+
+  var membre = {
+    nom: nom,
+    prenom: prenom,
+    tel: tel,
+    adresse: adresse,
+    groupe: type,
+    voix: voix,
+    instrument: instrument,
+    role: role,
+    eglise: document.getElementById('nom_eglise_actuelle').textContent
+  };
+
   if (editId == '') {
     var newRef = db.ref('eglises/' + egliseActuelle + '/membres').push();
     newRef.set(membre);
@@ -504,8 +514,8 @@ function afficherListe(type) {
       ligne.style.borderBottom = '1px solid #CCCCCC';
       ligne.style.padding = '10px 0';
       var detail = '<b>' + m.nom + ' ' + m.prenom + '</b><br>';
-      if (m.voix!= '') detail += 'Voix: ' + m.voix + '<br>';
-      if (m.instrument!= '') detail += 'Instrument: ' + m.instrument + '<br>';
+      if (m.voix && m.voix!= '') detail += 'Voix: ' + m.voix + '<br>';
+      if (m.instrument && m.instrument!= '') detail += 'Instrument: ' + m.instrument + '<br>';
       detail += 'Tel: ' + m.tel + ' - ' + m.adresse + '<br>';
       detail += '<button onclick="modifierMembre(\'' + m.id + '\', \'' + type + '\')" style="padding:5px 10px; background:#FFD700; border:none; margin:5px 5px 0 0;">MODIFIER</button>';
       detail += '<button onclick="supprimerMembre(\'' + m.id + '\', \'' + type + '\')" style="padding:5px 10px; background:#DC143C; color:#FFFFFF; border:none; margin:5px 0 0 0;">SUPPRIMER</button>';
@@ -811,12 +821,33 @@ function afficherListeGlobale() {
     var m = tousLesMembres[i];
     var p = document.createElement('p');
     var detail = '<b>' + m.nom + ' ' + m.prenom + '</b> - ' + m.groupe;
-    if (m.voix!= '') detail += ' - Voix: ' + m.voix;
-    if (m.instrument!= '') detail += ' - Instrument: ' + m.instrument;
+    if (m.voix && m.voix!= '') detail += ' - Voix: ' + m.voix;
+    if (m.instrument && m.instrument!= '') detail += ' - Instrument: ' + m.instrument;
     p.innerHTML = detail;
     div.appendChild(p);
   }
 }
+
+// CHARGEMENT DES STATS AVEC COMPTEURS À ZÉRO PAR DÉFAUT
+async function chargerStatsRoles() {
+  try {
+    const response = await fetch('membres.json');
+    const membres = await response.json();
+    const nomEglise = document.getElementById('nom_eglise_actuelle').textContent;
+
+    const membresEglise = membres.filter(m => m.eglise === nomEglise);
+
+    document.getElementById('nb_resp').textContent = membresEglise.filter(m => m.role === 'Responsable').length;
+    document.getElementById('nb_pasteur').textContent = membresEglise.filter(m => m.role === 'Pasteur').length;
+    document.getElementById('nb_chantre').textContent = membresEglise.filter(m => m.role === 'Chantre').length;
+    document.getElementById('nb_choriste').textContent = membresEglise.filter(m => m.role === 'Choriste').length;
+    document.getElementById('nb_musicien').textContent = membresEglise.filter(m => m.role === 'Musicien').length;
+  } catch (e) {
+    console.log('Erreur stats:', e);
+  }
+}
+
+setTimeout(chargerStatsRoles, 1000);
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js');
@@ -824,4 +855,3 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
-  if (nomPage == 'chant
