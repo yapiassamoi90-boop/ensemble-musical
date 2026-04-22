@@ -4,41 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Groupe Musical Multi-Eglise</title>
-  <!-- PWA AJOUTÉ : 3 lignes seulement -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#6495ED">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <!-- FIN PWA -->
-  <!-- FIREBASE POUR INTERNET -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
 <body style="margin:0; font-family:Arial; background:#F0F0F0;">
 
-  <!-- NOTIFICATION EN HAUT -->
   <div id="notif" style="display:none; position:fixed; top:0; width:100%; background:#DC143C; color:#FFFFFF; padding:15px; text-align:center; z-index:999;">
     <span id="texte_notif"></span>
     <span onclick="fermerNotif()" style="float:right; cursor:pointer; padding:0 10px;">✕</span>
   </div>
 
-  <!-- PORTAIL MULTI-EGLISE -->
   <div id="portail" style="padding:50px 20px; text-align:center;">
     <h2 style="text-align:center;">GROUPE MUSICAL</h2>
     <p style="color:#666666;">Entrez le nom de votre eglise + code</p>
-
     <input id="nom_eglise" placeholder="Nom de l eglise : Ex Bethel" style="width:100%; max-width:300px; padding:15px; font-size:18px; box-sizing:border-box; margin:10px auto; display:block; text-align:center;">
-
     <div style="position:relative; margin:10px auto; max-width:300px;">
       <input type="password" id="code_portail" placeholder="Code portail : 1234" style="width:100%; padding:15px; font-size:18px; box-sizing:border-box; text-align:center;">
       <span onclick="voirMdp('code_portail')" style="position:absolute; right:15px; top:15px; cursor:pointer;">👁️</span>
     </div>
-
     <button onclick="entrerPortail()" style="width:100%; max-width:300px; padding:15px; font-size:18px; background:#6495ED; color:#FFFFFF; border:none;">ENTRER</button>
     <p id="msg_connexion" style="color:#DC143C; margin-top:15px;"></p>
     <p style="font-size:12px; color:#888888; margin-top:20px;">Premiere fois? Tapez le nom de votre eglise + 1234<br>Votre espace sera cree automatiquement</p>
   </div>
 
-  <!-- POPUP CODE DOSSIER AVEC OEIL -->
   <div id="popup_code" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000;">
     <div style="background:#FFFFFF; width:80%; max-width:300px; margin:150px auto; padding:20px; text-align:center;">
       <h4>CODE D ACCES <span id="nom_dossier_popup"></span></h4>
@@ -51,21 +42,15 @@
     </div>
   </div>
 
-  <!-- BLOC 2 : ACCUEIL -->
   <div id="accueil" style="display:none; padding:10px; background:#F0F0F0;">
     <h3 style="text-align:center; margin:5px 0 5px 0;">EGLISE : <span id="nom_eglise_actuelle" style="color:#DC143C;"></span></h3>
-
-    <!-- AJOUT STATS AUTO : 1 LIGNE SEULEMENT -->
     <div id="stats" style="text-align:center; margin:10px 0 15px 0; font-size:16px; font-weight:bold; color:#333; background:#FFFFFF; padding:8px; border-radius:5px;">🎵 Chargement stats...</div>
-
     <button onclick="deconnexion()" style="width:100%; padding:8px; background:#888888; color:#FFFFFF; border:none; margin-bottom:15px;">DECONNEXION</button>
-
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
       <button onclick="demanderCode('responsables')" style="padding:25px 5px; font-size:16px; background:#00CED1; color:#000000; border:none;">RESPONSABLES</button>
       <button onclick="demanderCode('pasteur')" style="padding:25px 5px; font-size:16px; background:#DC143C; color:#FFFFFF; border:none;">PASTEUR</button>
       <button onclick="demanderCode('choriste')" style="padding:25px 5px; font-size:16px; background:#FFD700; color:#000000; border:none;">CHORISTE</button>
       <button onclick="demanderCode('chantre')" style="padding:25px 5px; font-size:16px; background:#9370DB; color:#FFFFFF; border:none;">CHANTRE</button>
-
       <button onclick="demanderCode('musicien')" style="padding:25px 5px; font-size:16px; background:#228B22; color:#FFFFFF; border:none;">MUSICIEN</button>
       <button onclick="ouvrirPage('chants')" style="padding:25px 5px; font-size:16px; background:#ADD8E6; color:#000000; border:2px solid #000000;">CHANTS <span id="badge_chant" style="background:#DC143C; color:#FFFFFF; border-radius:50%; padding:2px 6px; font-size:12px; display:none;">0</span></button>
       <button onclick="ouvrirPage('rapports')" style="padding:25px 5px; font-size:16px; background:#FFFACD; color:#000000; border:2px solid #000000;">RAPPORTS RECUS <span id="badge_rapport" style="background:#DC143C; color:#FFFFFF; border-radius:50%; padding:2px 6px; font-size:12px; display:none;">0</span></button>
@@ -73,11 +58,9 @@
     </div>
   </div>
 
-  <!-- RESPONSABLES ADMIN -->
   <div id="responsables" style="display:none; padding:20px; background:#F0F0F0;">
     <button onclick="retourAccueil()" style="padding:10px; background:#6495ED; color:#FFFFFF; border:none; margin-bottom:15px;">← RETOUR</button>
     <h3 style="text-align:center;">RESPONSABLES - ADMINISTRATEUR</h3>
-
     <h4>1. AJOUTER UN RESPONSABLE</h4>
     <input id="nom_resp" placeholder="Nom" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
     <input id="prenom_resp" placeholder="Prenom" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
@@ -85,12 +68,9 @@
     <input id="adresse_resp" placeholder="Adresse" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
     <input type="hidden" id="edit_id_resp" value="">
     <button onclick="ajouterOuModifier('resp')" id="btn_resp" style="width:100%; padding:12px; background:#228B22; color:#FFFFFF; border:none; margin:10px 0;">AJOUTER RESPONSABLE</button>
-
     <h4>Liste des responsables :</h4>
     <div id="liste_resp"></div>
-
     <hr style="margin:30px 0; border:2px solid #000000;">
-
     <h4>2. PARAMETRES ADMINISTRATEUR</h4>
     <select id="dossier_a_modifier" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
       <option value="">Choisir le dossier a modifier</option>
@@ -105,21 +85,16 @@
       <span onclick="voirMdp('nouveau_code_dossier_admin')" style="position:absolute; right:10px; top:13px; cursor:pointer;">👁️</span>
     </div>
     <button onclick="changerCodeDossierAdmin()" style="width:100%; padding:12px; background:#9370DB; color:#FFFFFF; border:none; margin:5px 0;">CHANGER CODE DU DOSSIER</button>
-
     <hr style="margin:30px 0; border:2px solid #000000;">
-
     <h4>3. NOTER LES PRESENTS DU JOUR</h4>
     <input id="nom_pres" placeholder="Nom du present" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
     <input id="prenom_pres" placeholder="Prenom du present" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
     <input id="tel_pres" placeholder="Telephone" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
     <button onclick="ajouterPresent()" style="width:100%; padding:12px; background:#228B22; color:#FFFFFF; border:none; margin:10px 0;">AJOUTER PRESENT</button>
-
     <h4>Liste de presence du jour :</h4>
     <div id="liste_presents"></div>
     <p><b>Total presents : <span id="total_presents">0</span></b></p>
-
     <hr style="margin:30px 0; border:2px solid #000000;">
-
     <h4>4. ENVOYER UN RAPPORT</h4>
     <textarea id="texte_rapport_resp" placeholder="Ecrire le rapport ici..." style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box; height:80px;"></textarea>
     <p>Envoyer a :</p>
@@ -130,11 +105,9 @@
     <button onclick="envoyerRapport('resp')" style="width:100%; padding:12px; background:#DC143C; color:#FFFFFF; border:none; margin:10px 0;">ENVOYER LE RAPPORT</button>
   </div>
 
-  <!-- PASTEUR AVEC CHANGEMENT CODE -->
   <div id="pasteur" style="display:none; padding:20px; background:#F0F0F0;">
     <button onclick="retourAccueil()" style="padding:10px; background:#6495ED; color:#FFFFFF; border:none; margin-bottom:15px;">← RETOUR</button>
     <h3 style="text-align:center;">PASTEUR</h3>
-
     <h4>1. AJOUTER UN PASTEUR</h4>
     <input id="nom_past" placeholder="Nom" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
     <input id="prenom_past" placeholder="Prenom" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
@@ -142,21 +115,16 @@
     <input id="adresse_past" placeholder="Adresse" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
     <input type="hidden" id="edit_id_past" value="">
     <button onclick="ajouterOuModifier('past')" id="btn_past" style="width:100%; padding:12px; background:#228B22; color:#FFFFFF; border:none; margin:10px 0;">AJOUTER</button>
-
     <h4>Liste :</h4>
     <div id="liste_past"></div>
-
     <hr style="margin:30px 0; border:2px solid #000000;">
-
     <h4>2. CHANGER MON CODE DOSSIER</h4>
     <div style="position:relative;">
       <input type="password" id="nouveau_code_pasteur" placeholder="Nouveau code pour dossier PASTEUR" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
       <span onclick="voirMdp('nouveau_code_pasteur')" style="position:absolute; right:10px; top:13px; cursor:pointer;">👁️</span>
     </div>
     <button onclick="changerCodePasteur()" style="width:100%; padding:12px; background:#9370DB; color:#FFFFFF; border:none; margin:5px 0;">CHANGER MON CODE</button>
-
     <hr style="margin:30px 0; border:2px solid #000000;">
-
     <h4>3. ENVOYER UN RAPPORT</h4>
     <textarea id="texte_rapport_past" placeholder="Ecrire le rapport ici..." style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box; height:80px;"></textarea>
     <p>Envoyer a :</p>
@@ -167,11 +135,9 @@
     <button onclick="envoyerRapport('past')" style="width:100%; padding:12px; background:#DC143C; color:#FFFFFF; border:none; margin:10px 0;">ENVOYER LE RAPPORT</button>
   </div>
 
-  <!-- CHORISTE AVEC VOIX + PROPOSITION CHANTS -->
   <div id="choriste" style="display:none; padding:20px; background:#F0F0F0;">
     <button onclick="retourAccueil()" style="padding:10px; background:#6495ED; color:#FFFFFF; border:none; margin-bottom:15px;">← RETOUR</button>
     <h3 style="text-align:center;">CHORISTE</h3>
-
     <h4>1. INSCRIPTION CHORISTE</h4>
     <input id="nom_chor" placeholder="Nom" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
     <input id="prenom_chor" placeholder="Prenom" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
@@ -186,37 +152,28 @@
     <input id="adresse_chor" placeholder="Adresse" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
     <input type="hidden" id="edit_id_chor" value="">
     <button onclick="ajouterOuModifier('chor')" id="btn_chor" style="width:100%; padding:12px; background:#228B22; color:#FFFFFF; border:none; margin:10px 0;">AJOUTER</button>
-
     <h4>Liste :</h4>
     <div id="liste_chor"></div>
-
     <hr style="margin:30px 0; border:2px solid #000000;">
-
     <h4>2. PROPOSER DES CHANTS</h4>
     <input id="nom_choriste_propose" placeholder="Ton nom de choriste" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
-
     <select id="categorie_chant_chor" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
       <option value="">Choisir la categorie</option>
       <option value="Adoration">ADORATION</option>
       <option value="Celebration">CELEBRATION</option>
     </select>
-
     <textarea id="texte_chant_propose_chor" placeholder="Ecris ton chant ici... titre, auteur, paroles, tout est libre" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box; height:100px;"></textarea>
     <button onclick="ajouterChantAListe('chor')" style="width:100%; padding:12px; background:#FFD700; color:#000000; border:none; margin:5px 0;">AJOUTER A MA LISTE</button>
-
     <h4>Ma liste de chants a envoyer :</h4>
     <div id="ma_liste_temporaire_chor" style="background:#FFFACD; padding:10px; min-height:50px;"></div>
     <button onclick="envoyerMaListe('chor')" style="width:100%; padding:12px; background:#DC143C; color:#FFFFFF; border:none; margin:10px 0;">ENVOYER TOUTE MA LISTE</button>
-
     <h4>Mes propositions deja envoyees :</h4>
     <div id="mes_chants_proposes_chor"></div>
   </div>
 
-  <!-- CHANTRE AVEC PROPOSITION CHANTS -->
   <div id="chantre" style="display:none; padding:20px; background:#F0F0F0;">
     <button onclick="retourAccueil()" style="padding:10px; background:#6495ED; color:#FFFFFF; border:none; margin-bottom:15px;">← RETOUR</button>
     <h3 style="text-align:center;">CHANTRE</h3>
-
     <h4>1. INSCRIPTION CHANTRE</h4>
     <input id="nom_chant" placeholder="Nom" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
     <input id="prenom_chant" placeholder="Prenom" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
@@ -231,37 +188,28 @@
     <input id="adresse_chant" placeholder="Adresse" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
     <input type="hidden" id="edit_id_chant" value="">
     <button onclick="ajouterOuModifier('chant')" id="btn_chant" style="width:100%; padding:12px; background:#228B22; color:#FFFFFF; border:none; margin:10px 0;">AJOUTER</button>
-
     <h4>Liste des chantres :</h4>
     <div id="liste_chant"></div>
-
     <hr style="margin:30px 0; border:2px solid #000000;">
-
     <h4>2. PROPOSER DES CHANTS</h4>
     <input id="nom_chantre_propose" placeholder="Ton nom de chantre" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
-
     <select id="categorie_chant" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
       <option value="">Choisir la categorie</option>
       <option value="Adoration">ADORATION</option>
       <option value="Celebration">CELEBRATION</option>
     </select>
-
     <textarea id="texte_chant_propose" placeholder="Ecris ton chant ici... titre, auteur, paroles, tout est libre" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box; height:100px;"></textarea>
     <button onclick="ajouterChantAListe('chant')" style="width:100%; padding:12px; background:#9370DB; color:#FFFFFF; border:none; margin:5px 0;">AJOUTER A MA LISTE</button>
-
     <h4>Ma liste de chants a envoyer :</h4>
     <div id="ma_liste_temporaire" style="background:#E6E6FA; padding:10px; min-height:50px;"></div>
     <button onclick="envoyerMaListe('chant')" style="width:100%; padding:12px; background:#DC143C; color:#FFFFFF; border:none; margin:10px 0;">ENVOYER TOUTE MA LISTE</button>
-
     <h4>Mes propositions deja envoyees :</h4>
     <div id="mes_chants_proposes"></div>
   </div>
 
-  <!-- MUSICIEN AVEC INSTRUMENT -->
   <div id="musicien" style="display:none; padding:20px; background:#F0F0F0;">
     <button onclick="retourAccueil()" style="padding:10px; background:#6495ED; color:#FFFFFF; border:none; margin-bottom:15px;">← RETOUR</button>
     <h3 style="text-align:center;">MUSICIEN</h3>
-
     <input id="nom_musi" placeholder="Nom" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
     <input id="prenom_musi" placeholder="Prenom" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
     <input id="instrument_musi" placeholder="Instrument joue : Piano, Guitare, Batterie..." style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
@@ -269,24 +217,19 @@
     <input id="adresse_musi" placeholder="Adresse" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
     <input type="hidden" id="edit_id_musi" value="">
     <button onclick="ajouterOuModifier('musi')" id="btn_musi" style="width:100%; padding:12px; background:#228B22; color:#FFFFFF; border:none; margin:10px 0;">AJOUTER</button>
-
     <h4>Liste :</h4>
     <div id="liste_musi"></div>
   </div>
 
-  <!-- CHANTS SANS CHANT OFFICIEL -->
   <div id="chants" style="display:none; padding:20px; background:#F0F0F0;">
     <button onclick="retourAccueil()" style="padding:10px; background:#6495ED; color:#FFFFFF; border:none; margin-bottom:15px;">← RETOUR</button>
     <h3 style="text-align:center;">CHANTS</h3>
-
     <h4 style="color:#9370DB;">CHANTS D'ADORATION PROPOSES :</h4>
     <div id="liste_adoration" style="background:#FFF0F5; padding:10px; margin-bottom:20px;"></div>
-
     <h4 style="color:#9370DB;">CHANTS DE CELEBRATION PROPOSES :</h4>
     <div id="liste_celebration" style="background:#F0FFF0; padding:10px; margin-bottom:20px;"></div>
   </div>
 
-  <!-- RAPPORTS RECUS -->
   <div id="rapports" style="display:none; padding:20px; background:#F0F0F0;">
     <button onclick="retourAccueil()" style="padding:10px; background:#6495ED; color:#FFFFFF; border:none; margin-bottom:15px;">← RETOUR</button>
     <h3 style="text-align:center;">RAPPORTS RECUS</h3>
@@ -297,7 +240,6 @@
     <div id="liste_rapports_envoyes"></div>
   </div>
 
-  <!-- LISTE GLOBALE -->
   <div id="liste" style="display:none; padding:20px; background:#F0F0F0;">
     <button onclick="retourAccueil()" style="padding:10px; background:#6495ED; color:#FFFFFF; border:none; margin-bottom:15px;">← RETOUR</button>
     <h3 style="text-align:center;">LISTE GLOBALE</h3>
@@ -305,7 +247,6 @@
   </div>
 
 <script>
-// CONFIG FIREBASE - REMPLACE PAR TES CLES GRATUITES
 const firebaseConfig = {
   apiKey: "AIzaSyB0GcSgzo-SuXJEGSdp0riEKsr52UFgY50",
   authDomain: "ensemble-musical.firebaseapp.com",
@@ -315,11 +256,8 @@ const firebaseConfig = {
   messagingSenderId: "910801581105",
   appId: "1:910801581105:web:d9147b8900cb05926bd110"
 };
-
 firebase.initializeApp(firebaseConfig);
 var db = firebase.database();
-
-// VARIABLES GLOBALES
 var egliseActuelle = '';
 var tousLesMembres = [];
 var rapportsEnvoyes = [];
@@ -339,7 +277,6 @@ var codesDossiers = {
   musicien: '1234'
 };
 
-// AJOUT STATS AUTO : SCRIPT POUR LIRE membres.json
 function chargerStats() {
   fetch('membres.json')
 .then(res => {
@@ -351,9 +288,7 @@ function chargerStats() {
       let chantres = data.filter(m => m.role === 'Chantre').length;
       let musiciens = data.filter(m => m.role === 'Musicien').length;
       let responsables = data.filter(m => m.role === 'Responsable').length;
-
-      document.getElementById('stats').innerHTML =
-        `🎵 Choristes: ${choristes} | Chantres: ${chantres} | Musiciens: ${musiciens} | Responsables: ${responsables} 🎵`;
+      document.getElementById('stats').innerHTML = `🎵 Choristes: ${choristes} | Chantres: ${chantres} | Musiciens: ${musiciens} | Responsables: ${responsables} 🎵`;
     })
 .catch(err => {
       document.getElementById('stats').innerHTML = '🎵 Choristes: 0 | Chantres: 0 | Musiciens: 0 | Responsables: 0 🎵';
@@ -374,7 +309,6 @@ function entrerPortail() {
   var nomEglise = document.getElementById('nom_eglise').value.trim().toUpperCase();
   var code = document.getElementById('code_portail').value;
   var msg = document.getElementById('msg_connexion');
-
   if (nomEglise == '') {
     msg.innerHTML = 'Entre le nom de ton eglise';
     return;
@@ -383,15 +317,13 @@ function entrerPortail() {
     msg.innerHTML = 'Code portail incorrect';
     return;
   }
-
   egliseActuelle = nomEglise.replace(/\s+/g, '_');
   document.getElementById('nom_eglise_actuelle').innerHTML = nomEglise;
   document.getElementById('portail').style.display = 'none';
   document.getElementById('accueil').style.display = 'block';
   msg.innerHTML = '';
-
   chargerDonneesEglise();
-  chargerStats(); // AJOUT : LANCE LES STATS
+  chargerStats();
 }
 
 function deconnexion() {
@@ -403,7 +335,6 @@ function deconnexion() {
 }
 
 function chargerDonneesEglise() {
-  // Charger tous les membres
   db.ref('eglises/' + egliseActuelle + '/membres').on('value', function(snapshot) {
     tousLesMembres = [];
     snapshot.forEach(function(child) {
@@ -412,8 +343,6 @@ function chargerDonneesEglise() {
       tousLesMembres.push(m);
     });
   });
-
-  // Charger codes dossiers personnalises
   db.ref('eglises/' + egliseActuelle + '/codes').once('value', function(snapshot) {
     if (snapshot.exists()) {
       codesDossiers = snapshot.val();
@@ -421,8 +350,6 @@ function chargerDonneesEglise() {
       db.ref('eglises/' + egliseActuelle + '/codes').set(codesDossiers);
     }
   });
-
-  // Charger chants proposes
   db.ref('eglises/' + egliseActuelle + '/chants').on('value', function(snapshot) {
     chantsProposes = [];
     snapshot.forEach(function(child) {
@@ -431,8 +358,6 @@ function chargerDonneesEglise() {
       chantsProposes.push(c);
     });
   });
-
-  // Charger rapports
   db.ref('eglises/' + egliseActuelle + '/rapports').on('value', function(snapshot) {
     rapportsEnvoyes = [];
     snapshot.forEach(function(child) {
@@ -517,7 +442,7 @@ function ouvrirPage(nomPage) {
     afficherMesPropositions('chor');
     afficherMaListeTemporaire('chor');
   }
-if (nomPage == 'responsables' || nomPage == 'pasteur' || nomPage == 'choriste' || nomPage == 'chantre' || nomPage == 'musicien') {
+  if (nomPage == 'responsables' || nomPage == 'pasteur' || nomPage == 'choriste' || nomPage == 'chantre' || nomPage == 'musicien') {
     afficherListe(nomPage == 'responsables'? 'resp' : nomPage == 'pasteur'? 'past' : nomPage == 'choriste'? 'chor' : nomPage == 'chantre'? 'chant' : 'musi');
   }
 }
@@ -536,7 +461,6 @@ function ajouterOuModifier(type) {
   var tel = document.getElementById('tel_' + type).value;
   var adresse = document.getElementById('adresse_' + type).value;
   var editId = document.getElementById('edit_id_' + type).value;
-
   var voix = '';
   var instrument = '';
   if (type == 'chant') {
@@ -548,14 +472,11 @@ function ajouterOuModifier(type) {
   if (type == 'musi') {
     instrument = document.getElementById('instrument_musi').value;
   }
-
   if (nom == '' || prenom == '') {
     alert('Nom et Prenom obligatoires');
     return;
   }
-
   var membre = {nom: nom, prenom: prenom, tel: tel, adresse: adresse, groupe: type, voix: voix, instrument: instrument};
-
   if (editId == '') {
     var newRef = db.ref('eglises/' + egliseActuelle + '/membres').push();
     newRef.set(membre);
@@ -564,7 +485,6 @@ function ajouterOuModifier(type) {
     document.getElementById('edit_id_' + type).value = '';
     document.getElementById('btn_' + type).innerHTML = 'AJOUTER';
   }
-
   document.getElementById('nom_' + type).value = '';
   document.getElementById('prenom_' + type).value = '';
   document.getElementById('tel_' + type).value = '';
@@ -577,7 +497,6 @@ function ajouterOuModifier(type) {
 function afficherListe(type) {
   var div = document.getElementById('liste_' + type);
   div.innerHTML = '';
-
   for (var i = 0; i < tousLesMembres.length; i++) {
     var m = tousLesMembres[i];
     if (m.groupe == type) {
@@ -624,16 +543,13 @@ function ajouterPresent() {
   var nom = document.getElementById('nom_pres').value;
   var prenom = document.getElementById('prenom_pres').value;
   var tel = document.getElementById('tel_pres').value;
-
   if (nom == '' || prenom == '') {
     alert('Nom et Prenom obligatoires');
     return;
   }
-
   var present = {ordre: numeroOrdre, nom: nom, prenom: prenom, tel: tel, heure: new Date().toLocaleTimeString()};
   db.ref('eglises/' + egliseActuelle + '/presents').push(present);
   numeroOrdre++;
-
   document.getElementById('nom_pres').value = '';
   document.getElementById('prenom_pres').value = '';
   document.getElementById('tel_pres').value = '';
@@ -641,12 +557,10 @@ function ajouterPresent() {
 
 db.ref('eglises/' + egliseActuelle + '/presents').on('value', function(snapshot) {
   listePresents = [];
-  var count = 0;
   snapshot.forEach(function(child) {
     var p = child.val();
     p.id = child.key;
     listePresents.push(p);
-    count++;
   });
   afficherListePresents();
 });
@@ -655,7 +569,6 @@ function afficherListePresents() {
   var div = document.getElementById('liste_presents');
   if (!div) return;
   div.innerHTML = '';
-
   for (var i = 0; i < listePresents.length; i++) {
     var p = listePresents[i];
     var ligne = document.createElement('p');
@@ -671,26 +584,19 @@ function afficherListePresents() {
 function ajouterChantAListe(type) {
   var categorie = '';
   var texte = '';
-  var nomInput = '';
-
   if (type == 'chant') {
     categorie = document.getElementById('categorie_chant').value;
     texte = document.getElementById('texte_chant_propose').value;
-    nomInput = 'nom_chantre_propose';
   } else {
     categorie = document.getElementById('categorie_chant_chor').value;
     texte = document.getElementById('texte_chant_propose_chor').value;
-    nomInput = 'nom_choriste_propose';
   }
-
   if (categorie == '' || texte == '') {
     alert('Choisis la categorie et ecris ton chant');
     return;
   }
-
   maListeChants[type].push({categorie: categorie, texte: texte});
   afficherMaListeTemporaire(type);
-
   if (type == 'chant') {
     document.getElementById('categorie_chant').value = '';
     document.getElementById('texte_chant_propose').value = '';
@@ -705,12 +611,10 @@ function afficherMaListeTemporaire(type) {
   var div = document.getElementById(divId);
   if (!div) return;
   div.innerHTML = '';
-
   if (maListeChants[type].length == 0) {
     div.innerHTML = '<p style="color:#888888;">Aucun chant ajoute</p>';
     return;
   }
-
   for (var i = 0; i < maListeChants[type].length; i++) {
     var c = maListeChants[type][i];
     var p = document.createElement('div');
@@ -718,8 +622,7 @@ function afficherMaListeTemporaire(type) {
     p.style.padding = '8px';
     p.style.margin = '5px 0';
     p.style.borderLeft = '4px solid #9370DB';
-    p.innerHTML = '<b>' + c.categorie + '</b><br>' + c.texte.replace(/\n/g, '<br>') +
-      '<br><button onclick="retirerChantListe(\'' + type + '\', ' + i + ')" style="background:#DC143C; color:#FFFFFF; border:none; padding:2px 8px; font-size:12px; margin-top:5px;">X</button>';
+    p.innerHTML = '<b>' + c.categorie + '</b><br>' + c.texte.replace(/\n/g, '<br>') + '<br><button onclick="retirerChantListe(\'' + type + '\', ' + i + ')" style="background:#DC143C; color:#FFFFFF; border:none; padding:2px 8px; font-size:12px; margin-top:5px;">X</button>';
     div.appendChild(p);
   }
 }
@@ -732,19 +635,15 @@ function retirerChantListe(type, index) {
 function envoyerMaListe(type) {
   var nomInput = type == 'chant'? 'nom_chantre_propose' : 'nom_choriste_propose';
   var nomPersonne = document.getElementById(nomInput).value;
-
   if (nomPersonne == '') {
     alert('Entre ton nom');
     return;
   }
-
   if (maListeChants[type].length == 0) {
     alert('Ajoute au moins un chant a ta liste');
     return;
   }
-
   var date = new Date().toLocaleString();
-
   for (var i = 0; i < maListeChants[type].length; i++) {
     var c = maListeChants[type][i];
     var proposition = {
@@ -756,19 +655,15 @@ function envoyerMaListe(type) {
     };
     db.ref('eglises/' + egliseActuelle + '/chants').push(proposition);
   }
-
   notifChant++;
   document.getElementById('badge_chant').innerHTML = notifChant;
   document.getElementById('badge_chant').style.display = 'inline';
   document.getElementById('texte_notif').innerHTML = nomPersonne + ' a propose ' + maListeChants[type].length + ' chant(s)';
   document.getElementById('notif').style.display = 'block';
-
   maListeChants[type] = [];
   afficherMaListeTemporaire(type);
   afficherMesPropositions(type);
-
   document.getElementById(nomInput).value = '';
-
   alert('Ta liste de chants a ete envoyee. Tout le monde peut la voir dans CHANTS');
 }
 
@@ -777,7 +672,6 @@ function afficherMesPropositions(type) {
   var div = document.getElementById(divId);
   if (!div) return;
   div.innerHTML = '';
-
   for (var i = chantsProposes.length - 1; i >= 0; i--) {
     var c = chantsProposes[i];
     if (c.groupe == type) {
@@ -796,13 +690,10 @@ function afficherChantsProposes() {
   var divAdoration = document.getElementById('liste_adoration');
   var divCelebration = document.getElementById('liste_celebration');
   if (!divAdoration ||!divCelebration) return;
-
   divAdoration.innerHTML = '';
   divCelebration.innerHTML = '';
-
   var countAdoration = 0;
   var countCelebration = 0;
-
   for (var i = 0; i < chantsProposes.length; i++) {
     var c = chantsProposes[i];
     var p = document.createElement('div');
@@ -811,7 +702,6 @@ function afficherChantsProposes() {
     p.style.margin = '8px 0';
     p.style.borderLeft = '4px solid #9370DB';
     p.innerHTML = '<div style="white-space:pre-wrap;">' + c.texte + '</div><br>Propose par: <b style="color:#DC143C;">' + c.chantre + ' (' + c.groupe + ')</b><br><small>Le ' + c.date + '</small>';
-
     if (c.categorie == 'Adoration') {
       divAdoration.appendChild(p);
       countAdoration++;
@@ -820,7 +710,6 @@ function afficherChantsProposes() {
       countCelebration++;
     }
   }
-
   if (countAdoration == 0) {
     divAdoration.innerHTML = '<p style="color:#888888;">Aucun chant d adoration propose</p>';
   }
@@ -832,7 +721,6 @@ function afficherChantsProposes() {
 function envoyerRapport(type) {
   var texte = '';
   var dest = [];
-
   if (type == 'resp') {
     texte = document.getElementById('texte_rapport_resp').value;
     var cases = document.getElementsByClassName('dest_rapport_resp');
@@ -850,26 +738,21 @@ function envoyerRapport(type) {
       }
     }
   }
-
   if (texte == '') {
     alert('Ecris un rapport d abord');
     return;
   }
-
   if (dest.length == 0) {
     alert('Coche au moins un destinataire');
     return;
   }
-
   var rapport = {texte: texte, destinataires: dest, date: new Date().toLocaleString(), auteur: type};
   db.ref('eglises/' + egliseActuelle + '/rapports').push(rapport);
-
   notifCount++;
   document.getElementById('badge_rapport').innerHTML = notifCount;
   document.getElementById('badge_rapport').style.display = 'inline';
   document.getElementById('texte_notif').innerHTML = 'Nouveau rapport recu';
   document.getElementById('notif').style.display = 'block';
-
   if (type == 'resp') {
     document.getElementById('texte_rapport_resp').value = '';
     var cases = document.getElementsByClassName('dest_rapport_resp');
@@ -883,7 +766,6 @@ function envoyerRapport(type) {
       cases[i].checked = false;
     }
   }
-
   alert('Rapport envoye a : ' + dest.join(', '));
 }
 
@@ -891,7 +773,6 @@ function afficherRapportsEnvoyes() {
   var div = document.getElementById('liste_rapports_envoyes');
   if (!div) return;
   div.innerHTML = '';
-
   for (var i = rapportsEnvoyes.length - 1; i >= 0; i--) {
     var r = rapportsEnvoyes[i];
     var p = document.createElement('p');
@@ -911,25 +792,21 @@ function genererRapport() {
   var html = '<h4>Resume des groupes - Eglise ' + egliseActuelle + '</h4>';
   html += '<p><b>Total membres inscrits:</b> ' + tousLesMembres.length + '</p>';
   html += '<p><b>Total presents aujourd hui:</b> ' + listePresents.length + '</p>';
-
   var groupes = {resp: 0, past: 0, chor: 0, chant: 0, musi: 0};
   for (var i = 0; i < tousLesMembres.length; i++) {
     groupes[tousLesMembres[i].groupe]++;
   }
-
   html += '<p>Responsables: ' + groupes.resp + '<br>';
   html += 'Pasteurs: ' + groupes.past + '<br>';
   html += 'Choristes: ' + groupes.chor + '<br>';
   html += 'Chantres: ' + groupes.chant + '<br>';
   html += 'Musiciens: ' + groupes.musi + '</p>';
-
   document.getElementById('contenu_rapport').innerHTML = html;
 }
 
 function afficherListeGlobale() {
   var div = document.getElementById('contenu_liste');
   div.innerHTML = '<h4>Tous les membres inscrits : ' + tousLesMembres.length + '</h4>';
-
   for (var i = 0; i < tousLesMembres.length; i++) {
     var m = tousLesMembres[i];
     var p = document.createElement('p');
@@ -941,11 +818,10 @@ function afficherListeGlobale() {
   }
 }
 
-// PWA : Enregistrement du Service Worker - CORRIGÉ
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js');
 }
-// FIN PWA
 </script>
 </body>
 </html>
+  if (nomPage == 'chant
