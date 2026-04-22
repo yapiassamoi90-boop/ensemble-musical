@@ -1,349 +1,433 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Groupe Musical</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 10px; background: #F5F5F5; }
-   .page { display: none; }
-    #accueil { display: block; }
-    h2 { color: #228B22; }
-
-    /* Dossiers accueil */
-   .dossier {
-      position: relative;
-      width: 140px;
-      height: 100px;
-      background: #FFFFFF;
-      margin: 10px;
-      display: inline-block;
-      text-align: center;
-      cursor: pointer;
-      border: 2px solid #228B22;
-      border-radius: 8px;
-      vertical-align: top;
-      padding-top: 20px;
-    }
-   .dossier:hover { background: #E6FFE6; }
-
-    /* Badge compteur rouge */
-   .badge-compteur {
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      background: #DC143C;
-      color: #FFFFFF;
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      text-align: center;
-      line-height: 24px;
-      font-size: 13px;
-      font-weight: bold;
-      display: none;
-    }
-
-    /* Popup code */
-    #popup_code {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.7);
-      text-align: center;
-      padding-top: 100px;
-    }
-    #popup_code > div {
-      background: #FFFFFF;
-      width: 300px;
-      margin: auto;
-      padding: 20px;
-      border-radius: 8px;
-    }
-
-    input, select, button, textarea {
-      padding: 8px;
-      margin: 5px 0;
-      width: 95%;
-      box-sizing: border-box;
-    }
-    button { background: #228B22; color: #FFFFFF; border: none; cursor: pointer; }
-    button:hover { background: #1A6B1A; }
-
-    /* Notif */
-    #notif {
-      display: none;
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      background: #FFD700;
-      padding: 10px;
-      border-radius: 5px;
-      border: 2px solid #DC143C;
-    }
-    #badge_rapport, #badge_chant {
-      background: #DC143C;
-      color: #FFFFFF;
-      border-radius: 50%;
-      padding: 2px 6px;
-      font-size: 12px;
-      display: none;
-    }
-  </style>
+  <title>Groupe Musical Multi-Eglise</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6495ED">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
-<body>
+<body style="margin:0; font-family:Arial; background:#F0F0F0;">
 
-<!-- PAGE ACCUEIL AVEC LES 8 DOSSIERS -->
-<div id="accueil" class="page">
-  <h2>GROUPE MUSICAL</h2>
-  <p>Code d'entrée : 1234 déjà validé</p>
-
-  <div class="dossier" onclick="demanderCodeDossier('responsables')">
-    <span class="badge-compteur" id="badge_resp">0</span>
-    <p><b>Responsable</b></p>
+  <div id="notif" style="display:none; position:fixed; top:0; width:100%; background:#DC143C; color:#FFFFFF; padding:15px; text-align:center; z-index:999;">
+    <span id="texte_notif"></span>
+    <span onclick="fermerNotif()" style="float:right; cursor:pointer; padding:0 10px;">✕</span>
   </div>
 
-  <div class="dossier" onclick="demanderCodeDossier('pasteur')">
-    <span class="badge-compteur" id="badge_past">0</span>
-    <p><b>Pasteur</b></p>
+  <div id="portail" style="padding:50px 20px; text-align:center;">
+    <h2 style="text-align:center;">GROUPE MUSICAL</h2>
+    <p style="color:#666666;">Entrez le nom de votre eglise + code</p>
+    <input id="nom_eglise" placeholder="Nom de l eglise : Ex Bethel" style="width:100%; max-width:300px; padding:15px; font-size:18px; box-sizing:border-box; margin:10px auto; display:block; text-align:center;">
+    <div style="position:relative; margin:10px auto; max-width:300px;">
+      <input type="password" id="code_portail" placeholder="Code portail : 1234" style="width:100%; padding:15px; font-size:18px; box-sizing:border-box; text-align:center;">
+      <span onclick="voirMdp('code_portail')" style="position:absolute; right:15px; top:15px; cursor:pointer;">👁️</span>
+    </div>
+    <button onclick="entrerPortail()" style="width:100%; max-width:300px; padding:15px; font-size:18px; background:#6495ED; color:#FFFFFF; border:none;">ENTRER</button>
+    <p id="msg_connexion" style="color:#DC143C; margin-top:15px;"></p>
+    <p style="font-size:12px; color:#888888; margin-top:20px;">Premiere fois? Tapez le nom de votre eglise + 1234<br>Votre espace sera cree automatiquement</p>
   </div>
 
-  <div class="dossier" onclick="demanderCodeDossier('choriste')">
-    <span class="badge-compteur" id="badge_chor">0</span>
-    <p><b>Choriste</b></p>
+  <div id="popup_code" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000;">
+    <div style="background:#FFFFFF; width:80%; max-width:300px; margin:150px auto; padding:20px; text-align:center;">
+      <h4>CODE D ACCES <span id="nom_dossier_popup"></span></h4>
+      <div style="position:relative;">
+        <input type="password" id="code_dossier" placeholder="Entrez le code" style="width:100%; padding:10px; margin:10px 0; box-sizing:border-box;">
+        <span onclick="voirMdp('code_dossier')" style="position:absolute; right:10px; top:18px; cursor:pointer;">👁️</span>
+      </div>
+      <button onclick="verifierCodeDossier()" style="width:100%; padding:12px; background:#228B22; color:#FFFFFF; border:none;">ENTRER</button>
+      <button onclick="fermerPopupCode()" style="width:100%; padding:10px; background:#DC143C; color:#FFFFFF; border:none; margin-top:5px;">ANNULER</button>
+    </div>
   </div>
 
-  <div class="dossier" onclick="demanderCodeDossier('chantre')">
-    <span class="badge-compteur" id="badge_chant">0</span>
-    <p><b>Chantre</b></p>
+  <div id="accueil" style="display:none; padding:10px; background:#F0F0F0;">
+    <h3 style="text-align:center; margin:5px 0 5px 0;">EGLISE : <span id="nom_eglise_actuelle" style="color:#DC143C;"></span></h3>
+
+    <!-- AJOUT COMPTEUR 1 : BARRE DES STATS -->
+    <div id="barre_stats" style="background:#2F4F4F; color:#FFFFFF; padding:10px; margin:10px 0; text-align:center; font-size:14px; font-weight:bold; border-radius:5px;">
+      <span id="nb_resp">0</span> Responsables |
+      <span id="nb_pasteur">0</span> Pasteurs |
+      <span id="nb_chantre">0</span> Chantres<br>
+      <span id="nb_choriste">0</span> Choristes |
+      <span id="nb_musicien">0</span> Musiciens
+    </div>
+
+    <button onclick="deconnexion()" style="width:100%; padding:8px; background:#888888; color:#FFFFFF; border:none; margin-bottom:15px;">DECONNEXION</button>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+      <button onclick="demanderCode('responsables')" style="padding:25px 5px; font-size:16px; background:#00CED1; color:#000000; border:none;">RESPONSABLES</button>
+      <button onclick="demanderCode('pasteur')" style="padding:25px 5px; font-size:16px; background:#DC143C; color:#FFFFFF; border:none;">PASTEUR</button>
+      <button onclick="demanderCode('choriste')" style="padding:25px 5px; font-size:16px; background:#FFD700; color:#000000; border:none;">CHORISTE</button>
+      <button onclick="demanderCode('chantre')" style="padding:25px 5px; font-size:16px; background:#9370DB; color:#FFFFFF; border:none;">CHANTRE</button>
+      <button onclick="demanderCode('musicien')" style="padding:25px 5px; font-size:16px; background:#228B22; color:#FFFFFF; border:none;">MUSICIEN</button>
+      <button onclick="ouvrirPage('chants')" style="padding:25px 5px; font-size:16px; background:#ADD8E6; color:#000000; border:2px solid #000000;">CHANTS <span id="badge_chant" style="background:#DC143C; color:#FFFFFF; border-radius:50%; padding:2px 6px; font-size:12px; display:none;">0</span></button>
+      <button onclick="ouvrirPage('rapports')" style="padding:25px 5px; font-size:16px; background:#FFFACD; color:#000000; border:2px solid #000000;">RAPPORTS RECUS <span id="badge_rapport" style="background:#DC143C; color:#FFFFFF; border-radius:50%; padding:2px 6px; font-size:12px; display:none;">0</span></button>
+      <button onclick="ouvrirPage('liste')" style="padding:25px 5px; font-size:16px; background:#90EE90; color:#000000; border:2px solid #000000;">LISTE GLOBALE</button>
+    </div>
   </div>
 
-  <div class="dossier" onclick="demanderCodeDossier('musicien')">
-    <span class="badge-compteur" id="badge_musi">0</span>
-    <p><b>Musicien</b></p>
+  <div id="responsables" style="display:none; padding:20px; background:#F0F0F0;">
+    <button onclick="retourAccueil()" style="padding:10px; background:#6495ED; color:#FFFFFF; border:none; margin-bottom:15px;">← RETOUR</button>
+    <h3 style="text-align:center;">RESPONSABLES - ADMINISTRATEUR</h3>
+    <h4>1. AJOUTER UN RESPONSABLE</h4>
+    <input id="nom_resp" placeholder="Nom" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input id="prenom_resp" placeholder="Prenom" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input id="tel_resp" placeholder="Telephone" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input id="adresse_resp" placeholder="Adresse" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input type="hidden" id="edit_id_resp" value="">
+    <button onclick="ajouterOuModifier('resp')" id="btn_resp" style="width:100%; padding:12px; background:#228B22; color:#FFFFFF; border:none; margin:10px 0;">AJOUTER RESPONSABLE</button>
+    <h4>Liste des responsables :</h4>
+    <div id="liste_resp"></div>
+    <hr style="margin:30px 0; border:2px solid #000000;">
+    <h4>2. PARAMETRES ADMINISTRATEUR</h4>
+    <select id="dossier_a_modifier" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+      <option value="">Choisir le dossier a modifier</option>
+      <option value="responsables">RESPONSABLES</option>
+      <option value="pasteur">PASTEUR</option>
+      <option value="choriste">CHORISTE</option>
+      <option value="chantre">CHANTRE</option>
+      <option value="musicien">MUSICIEN</option>
+    </select>
+    <div style="position:relative;">
+      <input type="password" id="nouveau_code_dossier_admin" placeholder="Nouveau code pour ce dossier" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+      <span onclick="voirMdp('nouveau_code_dossier_admin')" style="position:absolute; right:10px; top:13px; cursor:pointer;">👁️</span>
+    </div>
+    <button onclick="changerCodeDossierAdmin()" style="width:100%; padding:12px; background:#9370DB; color:#FFFFFF; border:none; margin:5px 0;">CHANGER CODE DU DOSSIER</button>
+    <hr style="margin:30px 0; border:2px solid #000000;">
+    <h4>3. NOTER LES PRESENTS DU JOUR</h4>
+    <input id="nom_pres" placeholder="Nom du present" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input id="prenom_pres" placeholder="Prenom du present" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input id="tel_pres" placeholder="Telephone" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <button onclick="ajouterPresent()" style="width:100%; padding:12px; background:#228B22; color:#FFFFFF; border:none; margin:10px 0;">AJOUTER PRESENT</button>
+    <h4>Liste de presence du jour :</h4>
+    <div id="liste_presents"></div>
+    <p><b>Total presents : <span id="total_presents">0</span></b></p>
+    <hr style="margin:30px 0; border:2px solid #000000;">
+    <h4>4. ENVOYER UN RAPPORT</h4>
+    <textarea id="texte_rapport_resp" placeholder="Ecrire le rapport ici..." style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box; height:80px;"></textarea>
+    <p>Envoyer a :</p>
+    <label><input type="checkbox" class="dest_rapport_resp" value="pasteur"> PASTEUR</label><br>
+    <label><input type="checkbox" class="dest_rapport_resp" value="choriste"> CHORISTE</label><br>
+    <label><input type="checkbox" class="dest_rapport_resp" value="chantre"> CHANTRE</label><br>
+    <label><input type="checkbox" class="dest_rapport_resp" value="musicien"> MUSICIEN</label><br>
+    <button onclick="envoyerRapport('resp')" style="width:100%; padding:12px; background:#DC143C; color:#FFFFFF; border:none; margin:10px 0;">ENVOYER LE RAPPORT</button>
   </div>
 
-  <div class="dossier" onclick="demanderCodeDossier('chants')">
-    <span id="badge_chant"></span>
-    <p><b>Chants</b></p>
+  <div id="pasteur" style="display:none; padding:20px; background:#F0F0F0;">
+    <button onclick="retourAccueil()" style="padding:10px; background:#6495ED; color:#FFFFFF; border:none; margin-bottom:15px;">← RETOUR</button>
+    <h3 style="text-align:center;">PASTEUR</h3>
+    <h4>1. AJOUTER UN PASTEUR</h4>
+    <input id="nom_past" placeholder="Nom" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input id="prenom_past" placeholder="Prenom" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input id="tel_past" placeholder="Telephone" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input id="adresse_past" placeholder="Adresse" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input type="hidden" id="edit_id_past" value="">
+    <button onclick="ajouterOuModifier('past')" id="btn_past" style="width:100%; padding:12px; background:#228B22; color:#FFFFFF; border:none; margin:10px 0;">AJOUTER</button>
+    <h4>Liste :</h4>
+    <div id="liste_past"></div>
+    <hr style="margin:30px 0; border:2px solid #000000;">
+    <h4>2. CHANGER MON CODE DOSSIER</h4>
+    <div style="position:relative;">
+      <input type="password" id="nouveau_code_pasteur" placeholder="Nouveau code pour dossier PASTEUR" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+      <span onclick="voirMdp('nouveau_code_pasteur')" style="position:absolute; right:10px; top:13px; cursor:pointer;">👁️</span>
+    </div>
+    <button onclick="changerCodePasteur()" style="width:100%; padding:12px; background:#9370DB; color:#FFFFFF; border:none; margin:5px 0;">CHANGER MON CODE</button>
+    <hr style="margin:30px 0; border:2px solid #000000;">
+    <h4>3. ENVOYER UN RAPPORT</h4>
+    <textarea id="texte_rapport_past" placeholder="Ecrire le rapport ici..." style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box; height:80px;"></textarea>
+    <p>Envoyer a :</p>
+    <label><input type="checkbox" class="dest_rapport_past" value="responsables"> RESPONSABLES</label><br>
+    <label><input type="checkbox" class="dest_rapport_past" value="choriste"> CHORISTE</label><br>
+    <label><input type="checkbox" class="dest_rapport_past" value="chantre"> CHANTRE</label><br>
+    <label><input type="checkbox" class="dest_rapport_past" value="musicien"> MUSICIEN</label><br>
+    <button onclick="envoyerRapport('past')" style="width:100%; padding:12px; background:#DC143C; color:#FFFFFF; border:none; margin:10px 0;">ENVOYER LE RAPPORT</button>
   </div>
 
-  <div class="dossier" onclick="demanderCodeDossier('rapports')">
-    <span id="badge_rapport"></span>
-    <p><b>Rapports</b></p>
+  <div id="choriste" style="display:none; padding:20px; background:#F0F0F0;">
+    <button onclick="retourAccueil()" style="padding:10px; background:#6495ED; color:#FFFFFF; border:none; margin-bottom:15px;">← RETOUR</button>
+    <h3 style="text-align:center;">CHORISTE</h3>
+    <h4>1. INSCRIPTION CHORISTE</h4>
+    <input id="nom_chor" placeholder="Nom" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input id="prenom_chor" placeholder="Prenom" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <select id="voix_chor" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+      <option value="">Choisir la voix</option>
+      <option value="Soprano">Soprano</option>
+      <option value="Alto">Alto</option>
+      <option value="Tenor">Tenor</option>
+      <option value="Basse">Basse</option>
+    </select>
+    <input id="tel_chor" placeholder="Telephone" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input id="adresse_chor" placeholder="Adresse" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input type="hidden" id="edit_id_chor" value="">
+    <button onclick="ajouterOuModifier('chor')" id="btn_chor" style="width:100%; padding:12px; background:#228B22; color:#FFFFFF; border:none; margin:10px 0;">AJOUTER</button>
+    <h4>Liste :</h4>
+    <div id="liste_chor"></div>
+    <hr style="margin:30px 0; border:2px solid #000000;">
+    <h4>2. PROPOSER DES CHANTS</h4>
+    <input id="nom_choriste_propose" placeholder="Ton nom de choriste" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <select id="categorie_chant_chor" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+      <option value="">Choisir la categorie</option>
+      <option value="Adoration">ADORATION</option>
+      <option value="Celebration">CELEBRATION</option>
+    </select>
+    <textarea id="texte_chant_propose_chor" placeholder="Ecris ton chant ici... titre, auteur, paroles, tout est libre" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box; height:100px;"></textarea>
+    <button onclick="ajouterChantAListe('chor')" style="width:100%; padding:12px; background:#FFD700; color:#000000; border:none; margin:5px 0;">AJOUTER A MA LISTE</button>
+    <h4>Ma liste de chants a envoyer :</h4>
+    <div id="ma_liste_temporaire_chor" style="background:#FFFACD; padding:10px; min-height:50px;"></div>
+    <button onclick="envoyerMaListe('chor')" style="width:100%; padding:12px; background:#DC143C; color:#FFFFFF; border:none; margin:10px 0;">ENVOYER TOUTE MA LISTE</button>
+    <h4>Mes propositions deja envoyees :</h4>
+    <div id="mes_chants_proposes_chor"></div>
   </div>
 
-  <div class="dossier" onclick="demanderCodeDossier('liste')">
-    <p><b>Liste</b></p>
+  <div id="chantre" style="display:none; padding:20px; background:#F0F0F0;">
+    <button onclick="retourAccueil()" style="padding:10px; background:#6495ED; color:#FFFFFF; border:none; margin-bottom:15px;">← RETOUR</button>
+    <h3 style="text-align:center;">CHANTRE</h3>
+    <h4>1. INSCRIPTION CHANTRE</h4>
+    <input id="nom_chant" placeholder="Nom" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input id="prenom_chant" placeholder="Prenom" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <select id="voix_chant" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+      <option value="">Choisir la voix</option>
+      <option value="Soprano">Soprano</option>
+      <option value="Alto">Alto</option>
+      <option value="Tenor">Tenor</option>
+      <option value="Basse">Basse</option>
+    </select>
+    <input id="tel_chant" placeholder="Telephone" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input id="adresse_chant" placeholder="Adresse" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input type="hidden" id="edit_id_chant" value="">
+    <button onclick="ajouterOuModifier('chant')" id="btn_chant" style="width:100%; padding:12px; background:#228B22; color:#FFFFFF; border:none; margin:10px 0;">AJOUTER</button>
+    <h4>Liste des chantres :</h4>
+    <div id="liste_chant"></div>
+    <hr style="margin:30px 0; border:2px solid #000000;">
+    <h4>2. PROPOSER DES CHANTS</h4>
+    <input id="nom_chantre_propose" placeholder="Ton nom de chantre" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <select id="categorie_chant" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+      <option value="">Choisir la categorie</option>
+      <option value="Adoration">ADORATION</option>
+      <option value="Celebration">CELEBRATION</option>
+    </select>
+    <textarea id="texte_chant_propose" placeholder="Ecris ton chant ici... titre, auteur, paroles, tout est libre" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box; height:100px;"></textarea>
+    <button onclick="ajouterChantAListe('chant')" style="width:100%; padding:12px; background:#9370DB; color:#FFFFFF; border:none; margin:5px 0;">AJOUTER A MA LISTE</button>
+    <h4>Ma liste de chants a envoyer :</h4>
+    <div id="ma_liste_temporaire" style="background:#E6E6FA; padding:10px; min-height:50px;"></div>
+    <button onclick="envoyerMaListe('chant')" style="width:100%; padding:12px; background:#DC143C; color:#FFFFFF; border:none; margin:10px 0;">ENVOYER TOUTE MA LISTE</button>
+    <h4>Mes propositions deja envoyees :</h4>
+    <div id="mes_chants_proposes"></div>
   </div>
-</div>
 
-<!-- POPUP CODE DOSSIER -->
-<div id="popup_code">
-  <div>
-    <h3>Code du dossier</h3>
-    <input type="password" id="code_dossier" placeholder="Entre le code">
-    <br>
-    <button onclick="verifierCodeDossier()">VALIDER</button>
-    <button onclick="fermerPopupCode()" style="background:#DC143C;">ANNULER</button>
+  <div id="musicien" style="display:none; padding:20px; background:#F0F0F0;">
+    <button onclick="retourAccueil()" style="padding:10px; background:#6495ED; color:#FFFFFF; border:none; margin-bottom:15px;">← RETOUR</button>
+    <h3 style="text-align:center;">MUSICIEN</h3>
+    <input id="nom_musi" placeholder="Nom" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input id="prenom_musi" placeholder="Prenom" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input id="instrument_musi" placeholder="Instrument joue : Piano, Guitare, Batterie..." style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input id="tel_musi" placeholder="Telephone" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input id="adresse_musi" placeholder="Adresse" style="width:100%; padding:10px; margin:5px 0; box-sizing:border-box;">
+    <input type="hidden" id="edit_id_musi" value="">
+    <button onclick="ajouterOuModifier('musi')" id="btn_musi" style="width:100%; padding:12px; background:#228B22; color:#FFFFFF; border:none; margin:10px 0;">AJOUTER</button>
+    <h4>Liste :</h4>
+    <div id="liste_musi"></div>
   </div>
-</div>
 
-<!-- NOTIFICATION -->
-<div id="notif">
-  <span id="texte_notif"></span>
-  <button onclick="fermerNotif()" style="background:#DC143C; padding:2px 5px; margin-left:10px;">X</button>
-</div>
+  <div id="chants" style="display:none; padding:20px; background:#F0F0F0;">
+    <button onclick="retourAccueil()" style="padding:10px; background:#6495ED; color:#FFFFFF; border:none; margin-bottom:15px;">← RETOUR</button>
+    <h3 style="text-align:center;">CHANTS</h3>
+    <h4 style="color:#9370DB;">CHANTS D'ADORATION PROPOSES :</h4>
+    <div id="liste_adoration" style="background:#FFF0F5; padding:10px; margin-bottom:20px;"></div>
+    <h4 style="color:#9370DB;">CHANTS DE CELEBRATION PROPOSES :</h4>
+    <div id="liste_celebration" style="background:#F0FFF0; padding:10px; margin-bottom:20px;"></div>
+  </div>
 
-<!-- PAGES DOSSIERS VIDES POUR L'INSTANT -->
-<div id="responsables" class="page">
-  <button onclick="retourAccueil()">← RETOUR</button>
-  <h2>DOSSIER RESPONSABLE</h2>
-  <input type="hidden" id="edit_id_resp">
-  <input type="text" id="nom_resp" placeholder="Nom">
-  <input type="text" id="prenom_resp" placeholder="Prénom">
-  <input type="text" id="tel_resp" placeholder="Téléphone">
-  <input type="text" id="adresse_resp" placeholder="Adresse">
-  <button id="btn_resp" onclick="ajouterOuModifier('resp')">AJOUTER</button>
-  <div id="liste_resp"></div>
-</div>
+  <div id="rapports" style="display:none; padding:20px; background:#F0F0F0;">
+    <button onclick="retourAccueil()" style="padding:10px; background:#6495ED; color:#FFFFFF; border:none; margin-bottom:15px;">← RETOUR</button>
+    <h3 style="text-align:center;">RAPPORTS RECUS</h3>
+    <button onclick="genererRapport()" style="width:100%; padding:12px; background:#6495ED; color:#FFFFFF; border:none; margin:10px 0;">VOIR RESUME GROUPES</button>
+    <div id="contenu_rapport" style="background:#FFFFFF; padding:15px; margin-top:15px;"></div>
+    <hr>
+    <h4>Rapports envoyes :</h4>
+    <div id="liste_rapports_envoyes"></div>
+  </div>
 
-<div id="pasteur" class="page">
-  <button onclick="retourAccueil()">← RETOUR</button>
-  <h2>DOSSIER PASTEUR</h2>
-  <input type="hidden" id="edit_id_past">
-  <input type="text" id="nom_past" placeholder="Nom">
-  <input type="text" id="prenom_past" placeholder="Prénom">
-  <input type="text" id="tel_past" placeholder="Téléphone">
-  <input type="text" id="adresse_past" placeholder="Adresse">
-  <button id="btn_past" onclick="ajouterOuModifier('past')">AJOUTER</button>
-  <div id="liste_past"></div>
-</div>
-
-<div id="choriste" class="page">
-  <button onclick="retourAccueil()">← RETOUR</button>
-  <h2>DOSSIER CHORISTE</h2>
-  <input type="hidden" id="edit_id_chor">
-  <input type="text" id="nom_chor" placeholder="Nom">
-  <input type="text" id="prenom_chor" placeholder="Prénom">
-  <input type="text" id="tel_chor" placeholder="Téléphone">
-  <input type="text" id="adresse_chor" placeholder="Adresse">
-  <select id="voix_chor">
-    <option value="">Voix...</option>
-    <option value="Soprano">Soprano</option>
-    <option value="Alto">Alto</option>
-    <option value="Ténor">Ténor</option>
-    <option value="Basse">Basse</option>
-  </select>
-  <button id="btn_chor" onclick="ajouterOuModifier('chor')">AJOUTER</button>
-  <hr>
-  <h3>Proposer un chant</h3>
-  <input type="text" id="nom_choriste_propose" placeholder="Ton nom">
-  <select id="categorie_chant_chor">
-    <option value="">Catégorie...</option>
-    <option value="Adoration">Adoration</option>
-    <option value="Celebration">Célébration</option>
-  </select>
-  <textarea id="texte_chant_propose_chor" placeholder="Écris le chant"></textarea>
-  <button onclick="ajouterChantAListe('chor')">AJOUTER À MA LISTE</button>
-  <div id="ma_liste_temporaire_chor"></div>
-  <button onclick="envoyerMaListe('chor')" style="background:#9370DB;">ENVOYER MA LISTE</button>
-  <hr>
-  <h4>Mes propositions envoyées</h4>
-  <div id="mes_chants_proposes_chor"></div>
-  <hr>
-  <div id="liste_chor"></div>
-</div>
-
-<div id="chantre" class="page">
-  <button onclick="retourAccueil()">← RETOUR</button>
-  <h2>DOSSIER CHANTRE</h2>
-  <input type="hidden" id="edit_id_chant">
-  <input type="text" id="nom_chant" placeholder="Nom">
-  <input type="text" id="prenom_chant" placeholder="Prénom">
-  <input type="text" id="tel_chant" placeholder="Téléphone">
-  <input type="text" id="adresse_chant" placeholder="Adresse">
-  <select id="voix_chant">
-    <option value="">Voix...</option>
-    <option value="Soprano">Soprano</option>
-    <option value="Alto">Alto</option>
-    <option value="Ténor">Ténor</option>
-    <option value="Basse">Basse</option>
-  </select>
-  <button id="btn_chant" onclick="ajouterOuModifier('chant')">AJOUTER</button>
-  <hr>
-  <h3>Proposer un chant</h3>
-  <input type="text" id="nom_chantre_propose" placeholder="Ton nom">
-  <select id="categorie_chant">
-    <option value="">Catégorie...</option>
-    <option value="Adoration">Adoration</option>
-    <option value="Celebration">Célébration</option>
-  </select>
-  <textarea id="texte_chant_propose" placeholder="Écris le chant"></textarea>
-  <button onclick="ajouterChantAListe('chant')">AJOUTER À MA LISTE</button>
-  <div id="ma_liste_temporaire"></div>
-  <button onclick="envoyerMaListe('chant')" style="background:#9370DB;">ENVOYER MA LISTE</button>
-  <hr>
-  <h4>Mes propositions envoyées</h4>
-  <div id="mes_chants_proposes"></div>
-  <hr>
-  <div id="liste_chant"></div>
-</div>
-
-<div id="musicien" class="page">
-  <button onclick="retourAccueil()">← RETOUR</button>
-  <h2>DOSSIER MUSICIEN</h2>
-  <input type="hidden" id="edit_id_musi">
-  <input type="text" id="nom_musi" placeholder="Nom">
-  <input type="text" id="prenom_musi" placeholder="Prénom">
-  <input type="text" id="tel_musi" placeholder="Téléphone">
-  <input type="text" id="adresse_musi" placeholder="Adresse">
-  <select id="instrument_musi">
-    <option value="">Instrument...</option>
-    <option value="Piano">Piano</option>
-    <option value="Synthé">Synthé</option>
-    <option value="Guitare basse">Guitare basse</option>
-    <option value="Guitare solo">Guitare solo</option>
-    <option value="Batterie">Batterie</option>
-    <option value="Percussions">Percussions</option>
-  </select>
-  <button id="btn_musi" onclick="ajouterOuModifier('musi')">AJOUTER</button>
-  <div id="liste_musi"></div>
-</div>
-
-<div id="chants" class="page">
-  <button onclick="retourAccueil()">← RETOUR</button>
-  <h2>CHANTS PROPOSÉS</h2>
-  <h3>Adoration</h3>
-  <div id="liste_adoration"></div>
-  <h3>Célébration</h3>
-  <div id="liste_celebration"></div>
-</div>
-
-<div id="rapports" class="page">
-  <button onclick="retourAccueil()">← RETOUR</button>
-  <h2>RAPPORTS</h2>
-  <h3>Envoyer un rapport Responsable</h3>
-  <textarea id="texte_rapport_resp" placeholder="Écris ton rapport"></textarea><br>
-  <label><input type="checkbox" class="dest_rapport_resp" value="Pasteur"> Pasteur</label>
-  <label><input type="checkbox" class="dest_rapport_resp" value="Tous"> Tous</label><br>
-  <button onclick="envoyerRapport('resp')">ENVOYER</button>
-  <hr>
-  <h3>Envoyer un rapport Pasteur</h3>
-  <textarea id="texte_rapport_past" placeholder="Écris ton rapport"></textarea><br>
-  <label><input type="checkbox" class="dest_rapport_past" value="Responsables"> Responsables</label>
-  <label><input type="checkbox" class="dest_rapport_past" value="Tous"> Tous</label><br>
-  <button onclick="envoyerRapport('past')">ENVOYER</button>
-  <hr>
-  <h4>Rapports reçus</h4>
-  <div id="liste_rapports_envoyes"></div>
-</div>
-
-<div id="liste" class="page">
-  <button onclick="retourAccueil()">← RETOUR</button>
-  <h2>LISTE GLOBALE</h2>
-  <button onclick="genererRapport()">GÉNÉRER RÉSUMÉ</button>
-  <div id="contenu_rapport"></div>
-  <hr>
-  <div id="contenu_liste"></div>
-</div>
+  <div id="liste" style="display:none; padding:20px; background:#F0F0F0;">
+    <button onclick="retourAccueil()" style="padding:10px; background:#6495ED; color:#FFFFFF; border:none; margin-bottom:15px;">← RETOUR</button>
+    <h3 style="text-align:center;">LISTE GLOBALE</h3>
+    <div id="contenu_liste"></div>
+  </div>
 
 <script>
-// VARIABLES GLOBALES
+const firebaseConfig = {
+  apiKey: "AIzaSyB0GcSgzo-SuXJEGSdp0riEKsr52UFgY50",
+  authDomain: "ensemble-musical.firebaseapp.com",
+  databaseURL: "https://ensemble-musical-default-rtdb.firebaseio.com",
+  projectId: "ensemble-musical",
+  storageBucket: "ensemble-musical.firebasestorage.app",
+  messagingSenderId: "910801581105",
+  appId: "1:910801581105:web:d9147b8900cb05926bd110"
+};
+firebase.initializeApp(firebaseConfig);
+var db = firebase.database();
+var egliseActuelle = '';
 var tousLesMembres = [];
-var listePresents = [];
-var chantsProposes = [];
 var rapportsEnvoyes = [];
+var notifCount = 0;
+var notifChant = 0;
+var listePresents = [];
 var numeroOrdre = 1;
-var egliseActuelle = 'DEMO';
+var chantsProposes = [];
+var maListeChants = {chant: [], chor: []};
 var pageEnAttente = '';
+var mdpPortail = '1234';
 var codesDossiers = {
   responsables: '1234',
   pasteur: '1234',
   choriste: '1234',
   chantre: '1234',
-  musicien: '1234',
-  chants: '1234',
-  rapports: '1234',
-  liste: '1234'
-};
-var notifCount = 0;
-var notifChant = 0;
-var maListeChants = {chant: [], chor: []};
-
-// COMPTEURS POUR CHAQUE DOSSIER
-var compteurs = {
-  resp: 0,
-  past: 0,
-  chor: 0,
-  chant: 0,
-  musi: 0
+  musicien: '1234'
 };
 
-function demanderCodeDossier(nom) {
-  pageEnAttente = nom;
-  document.getElementById('code_dossier').value = '';
+// AJOUT COMPTEUR 2 : FONCTION QUI COMPTE LES ROLES
+function chargerStatsRoles() {
+  var nbResp = 0, nbPast = 0, nbChant = 0, nbChor = 0, nbMusi = 0;
+  for (var i = 0; i < tousLesMembres.length; i++) {
+    var m = tousLesMembres[i];
+    if (m.groupe == 'resp') nbResp++;
+    else if (m.groupe == 'past') nbPast++;
+    else if (m.groupe == 'chant') nbChant++;
+    else if (m.groupe == 'chor') nbChor++;
+    else if (m.groupe == 'musi') nbMusi++;
+  }
+  document.getElementById('nb_resp').textContent = nbResp;
+  document.getElementById('nb_pasteur').textContent = nbPast;
+  document.getElementById('nb_chantre').textContent = nbChant;
+  document.getElementById('nb_choriste').textContent = nbChor;
+  document.getElementById('nb_musicien').textContent = nbMusi;
+}
+
+function chargerStats() {
+  fetch('membres.json')
+.then(res => {
+    if (!res.ok) throw new Error('Fichier introuvable');
+    return res.json();
+  })
+.then(data => {
+      let choristes = data.filter(m => m.role === 'Choriste').length;
+      let chantres = data.filter(m => m.role === 'Chantre').length;
+      let musiciens = data.filter(m => m.role === 'Musicien').length;
+      let responsables = data.filter(m => m.role === 'Responsable').length;
+      document.getElementById('stats').innerHTML = `🎵 Choristes: ${choristes} | Chantres: ${chantres} | Musiciens: ${musiciens} | Responsables: ${responsables} 🎵`;
+    })
+.catch(err => {
+      document.getElementById('stats').innerHTML = '🎵 Choristes: 0 | Chantres: 0 | Musiciens: 0 | Responsables: 0 🎵';
+      console.log('Erreur stats:', err);
+    });
+}
+
+function voirMdp(id) {
+  let champ = document.getElementById(id);
+  if (champ.type === "password") {
+    champ.type = "text";
+  } else {
+    champ.type = "password";
+  }
+}
+
+function entrerPortail() {
+  var nomEglise = document.getElementById('nom_eglise').value.trim().toUpperCase();
+  var code = document.getElementById('code_portail').value;
+  var msg = document.getElementById('msg_connexion');
+  if (nomEglise == '') {
+    msg.innerHTML = 'Entre le nom de ton eglise';
+    return;
+  }
+  if (code!= mdpPortail) {
+    msg.innerHTML = 'Code portail incorrect';
+    return;
+  }
+  egliseActuelle = nomEglise.replace(/\s+/g, '_');
+  document.getElementById('nom_eglise_actuelle').innerHTML = nomEglise;
+  document.getElementById('portail').style.display = 'none';
+  document.getElementById('accueil').style.display = 'block';
+  msg.innerHTML = '';
+  chargerDonneesEglise();
+  chargerStats();
+}
+
+function deconnexion() {
+  egliseActuelle = '';
+  document.getElementById('accueil').style.display = 'none';
+  document.getElementById('portail').style.display = 'block';
+  document.getElementById('nom_eglise').value = '';
+  document.getElementById('code_portail').value = '';
+}
+
+function chargerDonneesEglise() {
+  db.ref('eglises/' + egliseActuelle + '/membres').on('value', function(snapshot) {
+    tousLesMembres = [];
+    snapshot.forEach(function(child) {
+      var m = child.val();
+      m.id = child.key;
+      tousLesMembres.push(m);
+    });
+    chargerStatsRoles(); // AJOUT COMPTEUR 3 : RECHARGE QUAND LES DONNEES ARRIVENT
+  });
+  db.ref('eglises/' + egliseActuelle + '/codes').once('value', function(snapshot) {
+    if (snapshot.exists()) {
+      codesDossiers = snapshot.val();
+    } else {
+      db.ref('eglises/' + egliseActuelle + '/codes').set(codesDossiers);
+    }
+  });
+  db.ref('eglises/' + egliseActuelle + '/chants').on('value', function(snapshot) {
+    chantsProposes = [];
+    snapshot.forEach(function(child) {
+      var c = child.val();
+      c.id = child.key;
+      chantsProposes.push(c);
+    });
+  });
+  db.ref('eglises/' + egliseActuelle + '/rapports').on('value', function(snapshot) {
+    rapportsEnvoyes = [];
+    snapshot.forEach(function(child) {
+      var r = child.val();
+      r.id = child.key;
+      rapportsEnvoyes.push(r);
+    });
+  });
+}
+
+function changerCodeDossierAdmin() {
+  var dossier = document.getElementById('dossier_a_modifier').value;
+  var nouveau = document.getElementById('nouveau_code_dossier_admin').value;
+  if (dossier == '' || nouveau == '') {
+    alert('Choisis un dossier et entre un nouveau code');
+    return;
+  }
+  codesDossiers[dossier] = nouveau;
+  db.ref('eglises/' + egliseActuelle + '/codes').set(codesDossiers);
+  document.getElementById('dossier_a_modifier').value = '';
+  document.getElementById('nouveau_code_dossier_admin').value = '';
+  alert('Code du dossier ' + dossier + ' change. Nouveau: ' + nouveau);
+}
+
+function changerCodePasteur() {
+  var nouveau = document.getElementById('nouveau_code_pasteur').value;
+  if (nouveau == '') {
+    alert('Entre un nouveau code');
+    return;
+  }
+  codesDossiers.pasteur = nouveau;
+  db.ref('eglises/' + egliseActuelle + '/codes').set(codesDossiers);
+  document.getElementById('nouveau_code_pasteur').value = '';
+  alert('Ton code dossier PASTEUR a change. Nouveau: ' + nouveau);
+}
+
+function demanderCode(page) {
+  pageEnAttente = page;
+  document.getElementById('nom_dossier_popup').innerHTML = page.toUpperCase();
   document.getElementById('popup_code').style.display = 'block';
+  document.getElementById('code_dossier').value = '';
+  document.getElementById('code_dossier').type = 'password';
 }
 
 function verifierCodeDossier() {
@@ -362,9 +446,33 @@ function fermerPopupCode() {
   pageEnAttente = '';
 }
 
+// AJOUT COMPTEUR 2 : FONCTION QUI COMPTE LES ROLES
+function chargerStatsRoles() {
+  var nbResp = 0, nbPast = 0, nbChant = 0, nbChor = 0, nbMusi = 0;
+  for (var i = 0; i < tousLesMembres.length; i++) {
+    var m = tousLesMembres[i];
+    if (m.groupe == 'resp') nbResp++;
+    else if (m.groupe == 'past') nbPast++;
+    else if (m.groupe == 'chant') nbChant++;
+    else if (m.groupe == 'chor') nbChor++;
+    else if (m.groupe == 'musi') nbMusi++;
+  }
+  document.getElementById('nb_resp').textContent = nbResp;
+  document.getElementById('nb_pasteur').textContent = nbPast;
+  document.getElementById('nb_chantre').textContent = nbChant;
+  document.getElementById('nb_choriste').textContent = nbChor;
+  document.getElementById('nb_musicien').textContent = nbMusi;
+}
+
 function ouvrirPage(nomPage) {
   document.getElementById('accueil').style.display = 'none';
   document.getElementById(nomPage).style.display = 'block';
+
+  // AJOUT COMPTEUR 3 : RECHARGE QUAND ON OUVRE L ACCUEIL
+  if (nomPage == 'accueil' || nomPage == '') {
+    setTimeout(chargerStatsRoles, 300);
+  }
+
   if (nomPage == 'rapports') {
     notifCount = 0;
     document.getElementById('badge_rapport').style.display = 'none';
@@ -397,6 +505,7 @@ function retourAccueil() {
     document.getElementById(pages[i]).style.display = 'none';
   }
   document.getElementById('accueil').style.display = 'block';
+  chargerStatsRoles(); // AJOUT COMPTEUR : RECHARGE AU RETOUR
 }
 
 function ajouterOuModifier(type) {
@@ -465,38 +574,6 @@ function afficherListe(type) {
   }
 }
 
-function mettreAJourBadges() {
-  compteurs.resp = 0;
-  compteurs.past = 0;
-  compteurs.chor = 0;
-  compteurs.chant = 0;
-  compteurs.musi = 0;
-
-  for (var i = 0; i < tousLesMembres.length; i++) {
-    compteurs[tousLesMembres[i].groupe]++;
-  }
-
-  var badges = [
-    {id: 'badge_resp', count: compteurs.resp},
-    {id: 'badge_past', count: compteurs.past},
-    {id: 'badge_chor', count: compteurs.chor},
-    {id: 'badge_chant', count: compteurs.chant},
-    {id: 'badge_musi', count: compteurs.musi}
-  ];
-
-  for (var j = 0; j < badges.length; j++) {
-    var badge = document.getElementById(badges[j].id);
-    if (badge) {
-      if (badges[j].count > 0) {
-        badge.innerHTML = badges[j].count;
-        badge.style.display = 'block';
-      } else {
-        badge.style.display = 'none';
-      }
-    }
-  }
-}
-
 function supprimerMembre(id, type) {
   if (confirm('Supprimer cette personne?')) {
     db.ref('eglises/' + egliseActuelle + '/membres/' + id).remove();
@@ -540,16 +617,6 @@ function ajouterPresent() {
   document.getElementById('tel_pres').value = '';
 }
 
-db.ref('eglises/' + egliseActuelle + '/membres').on('value', function(snapshot) {
-  tousLesMembres = [];
-  snapshot.forEach(function(child) {
-    var m = child.val();
-    m.id = child.key;
-    tousLesMembres.push(m);
-  });
-  mettreAJourBadges();
-});
-
 db.ref('eglises/' + egliseActuelle + '/presents').on('value', function(snapshot) {
   listePresents = [];
   var count = 0;
@@ -576,9 +643,7 @@ function afficherListePresents() {
     ligne.innerHTML = '<b>N° ' + p.ordre + '</b> - ' + p.nom + ' ' + p.prenom + ' - Tel: ' + p.tel + ' - Heure: ' + p.heure;
     div.appendChild(ligne);
   }
-  if(document.getElementById('total_presents')) {
-    document.getElementById('total_presents').innerHTML = listePresents.length;
-  }
+  document.getElementById('total_presents').innerHTML = listePresents.length;
 }
 
 function ajouterChantAListe(type) {
@@ -853,25 +918,6 @@ function afficherListeGlobale() {
     div.appendChild(p);
   }
 }
-
-// ÉCOUTEURS FIREBASE POUR LES CHANTS ET RAPPORTS
-db.ref('eglises/' + egliseActuelle + '/chants').on('value', function(snapshot) {
-  chantsProposes = [];
-  snapshot.forEach(function(child) {
-    var c = child.val();
-    c.id = child.key;
-    chantsProposes.push(c);
-  });
-});
-
-db.ref('eglises/' + egliseActuelle + '/rapports').on('value', function(snapshot) {
-  rapportsEnvoyes = [];
-  snapshot.forEach(function(child) {
-    var r = child.val();
-    r.id = child.key;
-    rapportsEnvoyes.push(r);
-  });
-});
 
 // PWA : Enregistrement du Service Worker - CORRIGÉ
 if ('serviceWorker' in navigator) {
