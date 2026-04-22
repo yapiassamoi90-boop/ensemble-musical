@@ -1,6 +1,8 @@
 [
-  { "nom": "Jean", "role": "Choriste" },
-  { "nom": "Marie", "role": "Chantre" },
-  { "nom": "Paul", "role": "Musicien" },
-  { "nom": "Luc", "role": "Responsable" }
+  { "nom": "Jean", "role": "Choriste", "eglise": "BETHEL" },
+  { "nom": "Marie", "role": "Chantre", "eglise": "BETHEL" },
+  { "nom": "Paul", "role": "Pasteur", "eglise": "GRACE" },
+  { "nom": "Luc", "role": "Responsable", "eglise": "GRACE" },
+  { "nom": "David", "role": "Musicien", "eglise": "EMMANUEL" },
+  { "nom": "Ruth", "role": "Chantre", "eglise": "EMMANUEL" }
 ]
