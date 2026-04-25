@@ -921,11 +921,13 @@ function afficherListeGlobale() {
   }
 }
 
-// PWA : Enregistrement du Service Worker - CORRIGÉ
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js');
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/ensemble-musical/sw.js', {
+      scope: '/ensemble-musical/'
+    });
+  });
 }
-// FIN PWA
 </script>
 </body>
 </html>
