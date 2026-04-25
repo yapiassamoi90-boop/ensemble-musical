@@ -2,7 +2,8 @@
   "name": "Groupe Musical Multi-Eglise",
   "short_name": "GM Eglise",
   "description": "Application de gestion groupe musical multi-eglises",
-  "start_url": "./",
+  "start_url": "/ensemble-musical/",
+  "scope": "/ensemble-musical/",
   "display": "standalone",
   "background_color": "#F0F0F0",
   "theme_color": "#6495ED",
@@ -11,13 +12,14 @@
     {
       "src": "icon-musique-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "icon-musique-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any"
     }
   ]
 }
