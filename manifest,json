@@ -1,7 +1,7 @@
 {
   "name": "Groupe Musical Multi-Eglise",
   "short_name": "GM Eglise",
-  "description": "Application de gestion groupe musical multi-églises",
+  "description": "Application de gestion groupe musical multi-eglises",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#F0F0F0",
@@ -16,7 +16,8 @@
     {
       "src": "icon-musique-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
